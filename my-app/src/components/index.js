@@ -15,4 +15,5 @@ export {default as ScanningState} from './ScanningState'
 export {default as NotPlantState} from './NotPlantState'
 export {default as QuickResult} from './QuickResult'
 export {default as NotificationsPopup} from './NotificationPopup'
+export {default as PhotoModeModal} from './PhotoModeModal'
 

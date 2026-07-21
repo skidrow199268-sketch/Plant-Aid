@@ -4,6 +4,10 @@
 // Uses Plant.id API v3 for identification + health assessment.
 // Firebase Storage removed — images sent directly as base64.
 // Results saved to identificationHistory Firestore collection.
+//
+// CHANGED: identifyPlant() / runScanPipeline() now accept either
+// a single File or an array of Files (3-9 photos for a more
+// accurate multi-angle scan). Single-file callers are unaffected.
 // ============================================================
 
 import {
@@ -57,10 +61,12 @@ export function fileToBase64(file) {
 // ─────────────────────────────────────────────────────────────
 
 /**
- * Identify a plant from an image file using Plant.id API v3.
- * Sends image as base64 directly — no Storage upload needed.
+ * Identify a plant from one or more image files using Plant.id API v3.
+ * Sends image(s) as base64 directly — no Storage upload needed.
+ * Passing multiple images (different angles: leaf, flower, bark)
+ * generally improves identification accuracy.
  *
- * @param {File}   imageFile
+ * @param {File|File[]} files          – single file OR array of files (3-9 recommended)
  * @param {object} [options]
  * @param {string} [options.organ]     – 'leaf' | 'flower' | 'fruit' | 'bark' | 'auto'
  * @param {number} [options.latitude]
@@ -208,36 +214,33 @@ function normalizePlantIdResponse(raw) {
 
 
 
-export async function identifyPlant(file, { organ = 'auto', latitude, longitude } = {}) {
+export async function identifyPlant(files, { organ = 'auto', latitude, longitude } = {}) {
   if (!PLANT_ID_API_KEY) {
     throw new Error('[DiagnosticScan] VITE_PLANT_ID_API_KEY is not set in your .env file.');
   }
 
-  if (!file) {
+  // NEW: normalize single File or File[] into an array
+  const fileArray = Array.isArray(files) ? files : [files];
+
+  if (!fileArray.length || !fileArray[0]) {
     throw new Error('No file provided');
   }
 
+  // ✅ FORCE proper base64 conversion for every image
+  const base64Array = await Promise.all(fileArray.map((f) => fileToPlantIdBase64(f)));
 
-
-  // ✅ FORCE proper base64 conversion
-  const base64 = await fileToPlantIdBase64(file);
-
- console.log('FILE:', file);
-console.log('FILE TYPE:', file?.type);
-console.log('FILE SIZE:', file?.size);
-
-console.log('BASE64 START:', base64.substring(0, 100));
-console.log('BASE64 LENGTH:', base64.length);
+  console.log('FILE COUNT:', fileArray.length);
+  console.log('BASE64 LENGTHS:', base64Array.map((b) => b.length));
 
 const body = {
-  images: [base64],
+  images: base64Array,
   similar_images: true,
   health: 'all',
 
   classification_level: 'species',
 };
 
-console.log('REQUEST BODY:', body);
+console.log('REQUEST BODY IMAGE COUNT:', body.images.length);
   if (organ && organ !== 'auto') body.organs = [organ];
   if (latitude !== undefined) body.latitude = latitude;
   if (longitude !== undefined) body.longitude = longitude;
@@ -351,21 +354,22 @@ export async function fetchScanHistory(userId, maxItems = 10) {
 
 /**
  * Run the full scan pipeline:
- *   1. Call Plant.id API with base64 image directly
+ *   1. Call Plant.id API with base64 image(s) directly
  *   2. Save result to Firestore (if it's a plant)
  *
+ * CHANGED: imageFileOrFiles can now be a single File or a File[]
+ * (3-9 photos) for a more accurate multi-angle identification.
  * CHANGED: No longer uploads to Firebase Storage.
  * CHANGED: Returns localPreviewUrl instead of a Storage imageUrl.
  *          The frontend should pass the local object URL as preview.
  *
- * @param {string} userId
- * @param {File}   imageFile
- * @param {object} [options]         – passed to identifyPlant()
- * @param {string} [options.localPreviewUrl]  – local blob URL for display
+ * @param {string}        userId
+ * @param {File|File[]}   imageFileOrFiles
+ * @param {object}        [options]         – passed to identifyPlant()
  * @returns {Promise<{ scanId: string|null, result: PlantIdResult }>}
  */
-export async function runScanPipeline(userId, imageFile, options = {}) {
-  const result = await identifyPlant(imageFile, options);
+export async function runScanPipeline(userId, imageFileOrFiles, options = {}) {
+  const result = await identifyPlant(imageFileOrFiles, options);
 
   // Step 2 — save to Firestore only if it's actually a plant
   let scanId = null;

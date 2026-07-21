@@ -3,7 +3,7 @@ import * as Md from 'react-icons/md';
 import { IoLeaf } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Auth/Service/AuthContext';
-import { Topbar, FullPageLoader, MobileNav } from '../../../components/index';
+import { Topbar, FullPageLoader, MobileNav, Footer } from '../../../components/index';
 
 import {
   loadGardenDashboard,
@@ -146,18 +146,7 @@ export default function GardenDashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#c8c5ca]/40 dark:border-zinc-700 bg-white dark:bg-[#0f0f0f] px-6 py-6 flex flex-col items-center gap-1.5 pb-24 md:pb-6">
-        <div className="flex items-center gap-1.5">
-          <IoLeaf className="text-[#1b6b51] text-sm" />
-          <span className="text-sm font-bold text-black">PlantAid</span>
-        </div>
-        <div className="flex gap-5">
-          <button onClick={() => navigate('/signup')}  className="text-xs text-[#47464a] hover:text-[#1b6b51] transition-colors">Sign up</button>
-          <button onClick={() => navigate('/privacy')} className="text-xs text-[#47464a] hover:text-[#1b6b51] transition-colors">Privacy Policy</button>
-          <button onClick={() => navigate('/help')}    className="text-xs text-[#47464a] hover:text-[#1b6b51] transition-colors">Help Center</button>
-        </div>
-        <p className="text-xs text-[#1b6b51] font-medium">© {new Date().getFullYear()} PlantAid. Botanical Precision.</p>
-      </footer>
+     <Footer/>
 
       {/* Modals */}
       {showAddModal && (

@@ -27,12 +27,11 @@ import {
 
 import {CameraSheet,NotificationsPopup,NavButton} from './index'
 
-// ─────────────────────────────────────────────────────────────
-// Constants
-// ─────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'plantaid_active_route';
 
-const NAV_ITEMS = [
+
+export default function MobileNav() {
+  const NAV_ITEMS = [
   {
     label:      'Today',
     path:       '/dashboard',
@@ -59,7 +58,6 @@ const NAV_ITEMS = [
   },
 ];
 
-export default function MobileNav() {
   const [webcamOpen, setWebcamOpen] = useState(false);
   const videoRef = useRef(null);
 const canvasRef = useRef(null);

@@ -14,6 +14,7 @@ import {
 import {  ScanSuccessModal } from '../components/index';
 import { MdErrorOutline, MdBiotech,} from 'react-icons/md';
 import {BentoGridTips,NotAPlantCard,PlantIdResultPanel,ScanHistory,ScannerViewport} from '../components/index'
+import { useScanCache } from '../hooks/useScanCache';
 
 
 export default function DiagnosticScan() {
@@ -42,6 +43,9 @@ export default function DiagnosticScan() {
   const [modalOpen,    setModalOpen]    = useState(false);
   const [modalPlantData, setModalPlantData] = useState(null);
 
+  // ── Scan cache (survives page reload) ────────────────────
+  const { cached, saveCache, clearCache } = useScanCache(userId);
+
   // ── Load scan history on mount ───────────────────────────
   useEffect(() => {
     if (!userId) { setLoadingHistory(false); return; }
@@ -57,16 +61,34 @@ export default function DiagnosticScan() {
     })();
   }, [userId]);
 
+  // ── Hydrate scan state from cache once userId resolves ───
+  useEffect(() => {
+    if (cached?.scanResult) {
+      setScanResult(cached.scanResult);
+      setAnalysis(cached.analysis || null);
+      setScanId(cached.scanId || null);
+      setActiveOrgan(cached.activeOrgan || 'Auto');
+      // blob preview URLs die on reload — fall back to Plant.id's own image
+      setPreview(cached.scanResult.suggestions?.[0]?.imageUrl || '');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cached]);
+
 
   const handleScanAnother = useCallback(() => {
   fileInputRef.current?.click();
 }, []);
 
-  // ── Handle file → Plant.id → Gemini ──────────────────────
-  const handleFileSelected = useCallback(async (file) => {
+  // ── Handle file(s) → Plant.id → Gemini ───────────────────
+  // CHANGED: fileOrFiles can now be a single File OR a File[] (3-9
+  // photos) coming from ScannerViewport's multi-capture/multi-select flow.
+  const handleFileSelected = useCallback(async (fileOrFiles) => {
     if (!userId) return;
 
-    const localUrl = URL.createObjectURL(file);
+    const files = Array.isArray(fileOrFiles) ? fileOrFiles : [fileOrFiles];
+    if (files.length === 0 || !files[0]) return;
+
+    const localUrl = URL.createObjectURL(files[0]);
     setPreview(localUrl);
     setScanResult(null);
     setScanError(null);
@@ -82,10 +104,15 @@ export default function DiagnosticScan() {
     try {
       const organ = activeOrgan === 'Auto' ? undefined : activeOrgan.toLowerCase();
 
-      // ── Step 1: Plant.id identification ─────────────────
-      const { scanId: newScanId, result } = await runScanPipeline(userId, file, { organ });
+      // ── Step 1: Plant.id identification (single file or multi-photo array) ──
+      const { scanId: newScanId, result } = await runScanPipeline(
+        userId,
+        files.length === 1 ? files[0] : files,
+        { organ },
+      );
       setScanResult(result);
       setScanId(newScanId);
+      saveCache({ scanResult: result, scanId: newScanId, activeOrgan });
 
       if (result.isPlant) {
         fetchScanHistory(userId, 8).then(setHistory).catch(() => {});
@@ -118,6 +145,7 @@ export default function DiagnosticScan() {
         try {
           const { analysis: geminiAnalysis } = await runAnalysisPipeline(userId, newScanId, result);
           setAnalysis(geminiAnalysis);
+          saveCache({ analysis: geminiAnalysis });
         } catch (geminiErr) {
           console.error('Gemini analysis error:', geminiErr);
           setAnalysisError(geminiErr.message || 'Gemini analysis failed. You can still view the identification results.');
@@ -131,7 +159,7 @@ export default function DiagnosticScan() {
       setScanError(err.message || 'Scan failed. Please try again.');
       setScanning(false);
     }
-  }, [userId, activeOrgan]);
+  }, [userId, activeOrgan, saveCache]);
 
   // ── Reset ────────────────────────────────────────────────
   const handleRetry = useCallback(() => {
@@ -143,7 +171,8 @@ export default function DiagnosticScan() {
     setScanId(null);
     setModalOpen(false);
     setModalPlantData(null);
-  }, []);
+    clearCache();
+  }, [clearCache]);
 
   // ── NEW: Modal save handler ──────────────────────────────
   const handleModalSave = useCallback(() => {
