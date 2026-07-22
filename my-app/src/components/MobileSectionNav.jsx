@@ -4,19 +4,14 @@ import { useAuth } from '../pages/Auth/Service/AuthContext';
 
 import {
   MdAddCircleOutline,
-  MdHome,
-  MdOutlineEco,
-  MdNotificationsNone,
-  MdSearch
 } from 'react-icons/md';
-import { TbPlant2 } from 'react-icons/tb';
 
 import { NAV_ITEMS } from '../constant/sectionNavList';
 import { AddReminderModal } from './index';
 
 const STORAGE_KEY = 'plantaid_active_route';
 
-export default function MobileSectionNav() {
+export default function MobileSectionNav() { 
   const { currentUser } = useAuth();
   const userId = currentUser?.uid ?? null;
   const location = useLocation();
@@ -44,8 +39,8 @@ export default function MobileSectionNav() {
 
   return (
     <>
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-[#c8c5ca]/30 dark:border-zinc-700 z-40 pb-safe">
-        <nav className="flex items-stretch h-16 w-full max-w-md mx-auto px-2">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-t border-[#c8c5ca]/30 dark:border-zinc-700 shadow-[0_-4px_20px_rgba(0,0,0,0.04)] z-40 pb-safe">
+        <nav className="flex items-stretch h-16 w-full max-w-md mx-auto px-1">
 
           {NAV_ITEMS.map((item) => {
             const isActive = activeRoute === item.path;
@@ -54,34 +49,33 @@ export default function MobileSectionNav() {
               <button
                 key={item.key}
                 onClick={() => handleLinkClick(item.path)}
-                className="flex-1 flex flex-col items-center justify-center gap-0.5 relative active:scale-90 transition-transform no-underline"
-                style={{ WebkitTapHighlightColor: 'transparent' }}
+                className="flex-1 flex flex-col items-center justify-center gap-1 relative active:scale-90 transition-transform duration-150 no-underline"
+                style={{ WebkitTapHighlightColor: 'transparent', fontFamily: "'Manrope', sans-serif" }}
               >
                 <span
-                  className={`absolute top-1.5 w-1 h-1 rounded-full bg-[#1b6b51] transition-opacity duration-200 ${
+                  className={`absolute top-1 w-1 h-1 rounded-full bg-[#1b6b51] transition-opacity duration-200 ${
                     isActive ? 'opacity-100' : 'opacity-0'
                   }`}
                 />
 
                 <span
-                  className={`flex items-center justify-center w-10 h-[26px] rounded-full transition-all duration-200 ${
+                  className={`flex items-center justify-center w-10 h-6 rounded-full transition-colors duration-200 ${
                     isActive ? 'bg-[#a6f2d1]' : ''
                   }`}
                 >
                   <Icon
-                    className={`text-[20px] transition-colors duration-200 ${
+                    className={`text-[21px] transition-colors duration-200 ${
                       isActive ? 'text-[#1b6b51]' : 'text-zinc-400'
                     }`}
                   />
                 </span>
 
                 <span
-                  className={`text-[10px] transition-colors duration-200 ${
-                    isActive ? 'text-[#1b6b51] font-medium' : 'text-zinc-400'
+                  className={`text-[10.5px] leading-none tracking-tight transition-colors duration-200 ${
+                    isActive ? 'text-[#1b6b51] font-semibold' : 'text-zinc-400 font-medium'
                   }`}
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
-                 
+                  {item.label}
                 </span>
               </button>
             );
@@ -90,17 +84,14 @@ export default function MobileSectionNav() {
           {/* Add New button */}
           <button
             onClick={() => setShowModal(true)}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 relative active:scale-90 transition-transform"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
+            className="flex-1 flex flex-col items-center justify-center gap-1 relative active:scale-90 transition-transform duration-150"
+            style={{ WebkitTapHighlightColor: 'transparent', fontFamily: "'Manrope', sans-serif" }}
           >
-            <span className="flex items-center justify-center w-10 h-[26px] rounded-full transition-all duration-200 hover:bg-[#a6f2d1]/40">
-              <MdAddCircleOutline className="text-[20px] text-[#1b6b51]" />
+            <span className="flex items-center justify-center w-10 h-6 rounded-full transition-colors duration-200 hover:bg-[#a6f2d1]/40">
+              <MdAddCircleOutline className="text-[19px] text-[#1b6b51]" />
             </span>
-            <span
-              className="text-[10px] font-medium text-[#1b6b51]"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-            >
-              Add
+            <span className="text-[10.5px] leading-none tracking-tight font-semibold text-[#1b6b51]">
+              
             </span>
           </button>
 

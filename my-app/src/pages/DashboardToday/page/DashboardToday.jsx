@@ -86,7 +86,7 @@ export default function DashboardToday() {
   return (
     <div className="bg-zinc-50 text-zinc-800 pb-20 lg:pb-8 min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
       <Topbar/>
-      <div className="block lg:hidden">
+      <div className="block md:hidden">
   <MobileNav />
 </div>
 

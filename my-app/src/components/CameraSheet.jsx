@@ -19,6 +19,7 @@ import {
 import {UploadPrompt,ScanningState,ErrorState,NotPlantState,QuickResult} from './index'
 import { useScanCache } from '../pages/DiagnosticScan/hooks/useScanCache';
 import {PhotoModeModal} from './index'; 
+import { ScanSuccessModal } from '../pages/DiagnosticScan/components/index';
 
 const MAX_BATCH = 9;
 const MIN_BATCH = 3;
@@ -34,18 +35,18 @@ export default function CameraSheet({ onClose }) {
   const [scanning,  setScanning]  = useState(false);
   const [result,    setResult]    = useState(null);
   const [scanError, setScanError] = useState(null);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [successPlantData, setSuccessPlantData] = useState(null);
 
-  // ── shared scan cache (same key DiagnosticScan reads) ──
   const { saveCache, clearCache } = useScanCache(userId);
 
-  // ── NEW: photo-mode modal + multi-capture batch state ──
   const [modeModalOpen, setModeModalOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState(null); // 'camera' | 'upload'
+  const [pendingAction, setPendingAction] = useState(null); 
   const [multiActive,   setMultiActive]   = useState(false);
-  const [batch,         setBatch]         = useState([]);   // File[]
+  const [batch,         setBatch]         = useState([]);  
 
-  const cameraInputRef = useRef(null); // native single-shot camera (capture=environment)
-  const multiFileRef   = useRef(null); // native multi-select gallery
+  const cameraInputRef = useRef(null);
+  const multiFileRef   = useRef(null); 
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -64,10 +65,32 @@ export default function CameraSheet({ onClose }) {
     setScanError(null);
     setScanning(true);
 
+  
+    setSuccessModalOpen(false);
+    setSuccessPlantData(null);
+
     try {
       const { scanId, result: scanResult } = await runScanPipeline(userId, valid.length === 1 ? valid[0] : valid, {});
       setResult(scanResult);
       saveCache({ scanResult, scanId }); // so /diagnostic-scan hydrates with this scan
+
+      // ── NEW: pop the success modal once identification lands ──
+      if (scanResult.isPlant && scanResult.suggestions?.length > 0) {
+        const topMatch   = scanResult.suggestions[0];
+        const confidence = Math.round((topMatch?.probability ?? 0) * 100);
+
+        setSuccessPlantData({
+          commonName:     topMatch?.commonNames?.[0] || topMatch?.name || 'Unknown Plant',
+          scientificName: topMatch?.name || '',
+          imageSrc:       topMatch?.imageUrl || localUrl,
+          confidence,
+          healthStatus:   scanResult.isHealthy ? 'Healthy' : 'Needs Attention',
+          anomalies:      scanResult.diseases?.length > 0
+                            ? scanResult.diseases.map(d => d.commonNames?.[0] || d.name).join(', ')
+                            : 'None',
+        });
+        setSuccessModalOpen(true);
+      }
     } catch (err) {
       console.error('Quick scan error:', err);
       setScanError('Scan failed. Please try again.');
@@ -82,7 +105,7 @@ export default function CameraSheet({ onClose }) {
     return () => window.removeEventListener('quick-scan-file', handler);
   }, [handleFile]);
 
-  // ── NEW: mode picker flow ───────────────────────────────
+ 
   const openModeModal = (action) => {
     setPendingAction(action);
     setModeModalOpen(true);
@@ -148,8 +171,16 @@ export default function CameraSheet({ onClose }) {
     setPreview('');
     setResult(null);
     setScanError(null);
+    setSuccessModalOpen(false);
+    setSuccessPlantData(null);
     clearCache();
   }, [clearCache]);
+
+  // ── NEW: modal save handler ──────────────────────────────
+  const handleModalSave = useCallback(() => {
+    setSuccessModalOpen(false);
+    // hook into garden catalog save logic here if needed
+  }, []);
 
   const topMatch   = result?.suggestions?.[0];
   const healthCfg  = result ? getHealthConfig(result.isHealthy, result.isHealthyScore) : null;
@@ -290,6 +321,14 @@ export default function CameraSheet({ onClose }) {
 
         <div className="h-6" />
       </div>
+
+      {/* ── NEW: success modal — pops as soon as identification lands ── */}
+      <ScanSuccessModal
+        isOpen={successModalOpen}
+        onClose={() => setSuccessModalOpen(false)}
+        onSave={handleModalSave}
+        plantData={successPlantData}
+      />
 
       {/* ── NEW: photo mode picker ──────────────────────── */}
       <PhotoModeModal

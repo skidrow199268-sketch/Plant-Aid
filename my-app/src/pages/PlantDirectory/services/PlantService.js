@@ -260,19 +260,6 @@ export function inferCategory(plant) {
 // 5. AGGREGATE – single call that loads everything the directory needs
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Load all directory data in parallel.
- * Call this once on mount with the authenticated userId.
- *
- * @param {string} userId
- * @returns {Promise<DirectoryData>}
- *
- * DirectoryData shape:
- * {
- *   plants:         PlantDoc[],          // full catalog
- *   addedPlantIds:  Set<string>,         // catalog IDs already in garden
- * }
- */
 export async function loadDirectoryData(userId) {
   const [plants, addedPlantIds] = await Promise.all([
     fetchAllPlants(),
@@ -280,4 +267,32 @@ export async function loadDirectoryData(userId) {
   ]);
 
   return { plants, addedPlantIds };
+}
+
+export async function findPlantByName(name) {
+  const q = query(
+    collection(db, 'plants'),
+    where('name', '==', name),
+  );
+  const snap = await getDocs(q);
+  if (snap.empty) return null;
+  const d = snap.docs[0];
+  return { id: d.id, ...d.data() };
+}
+
+export async function addPlantToCatalog(data) {
+  const docRef = await addDoc(collection(db, 'plants'), {
+    name:                data.name,
+    scientificName:      data.scientificName ?? '',
+    description:         data.description ?? '',
+    imageUrl:            data.imageUrl ?? '',
+    sunlight:            data.sunlight ?? '',
+    wateringFrequency:   data.wateringFrequency ?? 0,
+    fertilizerFrequency: data.fertilizerFrequency ?? 0,
+    growthDays:          data.growthDays ?? 0,
+    pests:               data.pests ?? [],
+    diseases:            data.diseases ?? [],
+    createdAt:           Timestamp.now(),
+  });
+  return docRef.id;
 }

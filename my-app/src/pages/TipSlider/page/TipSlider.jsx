@@ -88,7 +88,7 @@ export default function PlantTipsSlider() {
   }
 
   return (
-    <div className="bg-[#fbf8ff] dark:bg-[#0f0f0f] text-[#1a1b22] dark:text-gray-100 min-h-screen flex flex-col font-sans pb-20 lg:pb-0">
+    <div className="bg-[#fbf8ff] dark:bg-[#0f0f0f] text-[#1a1b22] dark:text-gray-100 min-h-screen flex flex-col  pb-20 lg:pb-0">
 
       <Topbar />
 

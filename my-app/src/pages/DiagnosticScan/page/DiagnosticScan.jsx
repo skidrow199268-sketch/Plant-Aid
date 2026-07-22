@@ -10,6 +10,7 @@ import {
 import {
   runAnalysisPipeline,
 } from '../services/PlantAnalysis';
+import { saveScanToGarden } from '../../GardenDashboard/services/GardenService';
 
 import {  ScanSuccessModal } from '../components/index';
 import { MdErrorOutline, MdBiotech,} from 'react-icons/md';
@@ -42,6 +43,10 @@ export default function DiagnosticScan() {
   // ── NEW: Success modal state ─────────────────────────────
   const [modalOpen,    setModalOpen]    = useState(false);
   const [modalPlantData, setModalPlantData] = useState(null);
+
+  // ── NEW: save-to-garden feedback state ───────────────────
+  const [saving,  setSaving]  = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   // ── Scan cache (survives page reload) ────────────────────
   const { cached, saveCache, clearCache } = useScanCache(userId);
@@ -100,6 +105,7 @@ export default function DiagnosticScan() {
     // Close modal if it was open from a previous scan
     setModalOpen(false);
     setModalPlantData(null);
+    setSaveError(null);
 
     try {
       const organ = activeOrgan === 'Auto' ? undefined : activeOrgan.toLowerCase();
@@ -171,15 +177,27 @@ export default function DiagnosticScan() {
     setScanId(null);
     setModalOpen(false);
     setModalPlantData(null);
+    setSaveError(null);
     clearCache();
   }, [clearCache]);
 
-  // ── NEW: Modal save handler ──────────────────────────────
-  const handleModalSave = useCallback(() => {
-    // Close the modal — the full results are already shown below
-    setModalOpen(false);
-    // You can hook into your garden catalog save logic here if needed
-  }, []);
+  // ── CHANGED: Modal save handler — actually writes to Firestore now ──
+   const handleModalSave = useCallback(async () => {
+    if (!userId || !modalPlantData) { setModalOpen(false); return; }
+ 
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await saveScanToGarden(userId, modalPlantData, analysis, scanId);
+      setModalOpen(false);
+    } catch (err) {
+      console.error('Save to garden error:', err);
+      setSaveError(err.message || 'Could not save to your garden. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }, [userId, modalPlantData, analysis, scanId]);
+ 
 
   if (loadingHistory && !currentUser) {
     return <FullPageLoader message="Preparing diagnostic scanner" />;
@@ -194,7 +212,7 @@ export default function DiagnosticScan() {
         }
       `}</style>
         {/* Desktop topbar — hidden on small screens */}
-<div className="hidden lg:block">
+<div className="hidden md:block">
   <Topbar />
 </div>
 
@@ -205,13 +223,14 @@ export default function DiagnosticScan() {
     
 
       {/* ── NEW: Success Modal ───────────────────────────── */}
-      <ScanSuccessModal
+       <ScanSuccessModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={handleModalSave}
         plantData={modalPlantData}
+        saving={saving}
+        analysisLoading={analysisLoading}   // ← new prop
       />
-
       <main className="flex-grow flex flex-col items-center px-4 md:px-6 py-8 max-w-7xl mx-auto w-full gap-6 pb-28 lg:pb-8">
 
         <section className="text-center space-y-1 max-w-xl">
@@ -232,6 +251,14 @@ export default function DiagnosticScan() {
             <MdErrorOutline className="flex-shrink-0 text-lg" />
             <span>{scanError}</span>
             <button onClick={handleRetry} className="ml-auto text-xs font-bold underline hover:opacity-70">Dismiss</button>
+          </div>
+        )}
+
+        {saveError && (
+          <div className="w-full max-w-3xl flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm rounded-2xl px-4 py-3">
+            <MdErrorOutline className="flex-shrink-0 text-lg" />
+            <span>{saveError}</span>
+            <button onClick={() => setSaveError(null)} className="ml-auto text-xs font-bold underline hover:opacity-70">Dismiss</button>
           </div>
         )}
 

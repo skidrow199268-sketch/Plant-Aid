@@ -10,7 +10,7 @@ import {
   completeReminder,
   uncompleteReminder,
   
-} from '../services/GardenService';
+} from '../services/GardenService.js';
 
 import { isReminderDone } from '../utils/gardenUtils.jsx';
 import {AddSpecimenModal,CareScheduleList,ClimateControlModal,FeaturedPlantCard,
@@ -33,12 +33,17 @@ export default function GardenDashboard() {
   const [showAddModal,     setShowAddModal]     = useState(false);
   const [showClimateModal, setShowClimateModal] = useState(false);
 
+  // NEW: which plant the featured card is currently showing.
+  // null = fall back to gardenData.featuredPlant (most recent).
+  const [selectedPlant, setSelectedPlant] = useState(null);
+
   const loadData = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
     setError(null);
     try {
       setGardenData(await loadGardenDashboard(userId));
+      setSelectedPlant(null); // reset selection on fresh load
     } catch (err) {
       console.error('Garden dashboard load error:', err);
       setError('Could not load garden data. Please check your connection.');
@@ -85,7 +90,8 @@ export default function GardenDashboard() {
   if (loading) return <FullPageLoader message="Garden is loading, please wait" />;
 
   const { userPlants, featuredPlant, todayReminders, stats } = gardenData;
-  const pendingCount = todayReminders.filter((r) => !isReminderDone(r)).length;
+  const pendingCount   = todayReminders.filter((r) => !isReminderDone(r)).length;
+  const displayedPlant = selectedPlant || featuredPlant; // NEW
 
   return (
     <div className="bg-zinc-50/60 min-h-screen text-[#1a1b22] antialiased overflow-x-hidden">
@@ -93,7 +99,7 @@ export default function GardenDashboard() {
       <Topbar />
       <MobileNav />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 pb-24 md:pb-10 space-y-5">
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 pb-24 md:pb-10 space-y-5 ">
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl px-4 py-2.5 flex items-center gap-2">
@@ -130,7 +136,12 @@ export default function GardenDashboard() {
 
           {/* Left: featured plant */}
           <div className="lg:col-span-3">
-            <FeaturedPlantCard plant={featuredPlant} navigate={navigate} />
+            <FeaturedPlantCard
+              plant={displayedPlant}
+              allPlants={userPlants}
+              onSelectPlant={setSelectedPlant}
+              navigate={navigate}
+            />
           </div>
 
           {/* Right: care schedule + quick actions */}
@@ -146,7 +157,10 @@ export default function GardenDashboard() {
       </main>
 
       {/* Footer */}
-     <Footer/>
+     {/* Footer */}
+<div className="pb-16 md:pb-0">
+  <Footer />
+</div>
 
       {/* Modals */}
       {showAddModal && (

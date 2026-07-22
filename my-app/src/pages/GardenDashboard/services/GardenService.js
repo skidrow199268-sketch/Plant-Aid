@@ -1,6 +1,12 @@
 // GardenService.js
 // Data layer for the Garden Dashboard screen.
 // Follows the same pattern as DashboardService.js
+//
+// CHANGED: saveScanToGarden() now accepts the Gemini `analysis` object
+// and maps it onto the catalog `plants` doc (sunlight, watering,
+// fertilizing, growthDays, description, pests). Also now stamps
+// plantedDate on the new userPlants doc so day-count / progress
+// tracking works immediately after a scan.
 // ============================================================
 
 import {
@@ -18,22 +24,12 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
-
+import { findPlantByName, addPlantToCatalog } from '../../PlantDirectory/services/PlantService';
 
 // ─────────────────────────────────────────────────────────────
 // 1. USER PLANTS
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Fetch all userPlants for a user, ordered by newest first.
- *
- * @param {string} userId
- * @returns {Promise<UserPlantDoc[]>}
- *
- * UserPlantDoc shape:
- * { id, userId, plantId, nickname, plantedDate, currentStage,
- *   healthStatus, imageUrl, latitude, longitude, createdAt }
- */
 export async function fetchUserPlants(userId) {
   const q = query(
     collection(db, 'userPlants'),
@@ -44,23 +40,12 @@ export async function fetchUserPlants(userId) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-/**
- * Fetch a single userPlant by ID.
- *
- * @param {string} userPlantId
- * @returns {Promise<UserPlantDoc|null>}
- */
 export async function fetchUserPlantById(userPlantId) {
   const snap = await getDoc(doc(db, 'userPlants', userPlantId));
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-/**
- * Fetch the most recently added userPlant (used as the "featured" plant).
- *
- * @param {string} userId
- * @returns {Promise<UserPlantDoc|null>}
- */
+
 export async function fetchFeaturedPlant(userId) {
   const q = query(
     collection(db, 'userPlants'),
@@ -74,16 +59,118 @@ export async function fetchFeaturedPlant(userId) {
   return { id: d.id, ...d.data() };
 }
 
-/**
- * Update the health status of a userPlant.
- * healthStatus: 'HEALTHY' | 'WARNING' | 'SICK'
- *
- * @param {string} userPlantId
- * @param {string} healthStatus
- * @returns {Promise<void>}
- */
 export async function updatePlantHealth(userPlantId, healthStatus) {
   await updateDoc(doc(db, 'userPlants', userPlantId), { healthStatus });
+}
+
+
+// ── NEW: small parsers to turn Gemini's free-text guides into the
+// numeric/keyed fields the rest of the app (ProgressView,
+// BotanicalSpecsView, sunlightLabel) already expects. ──
+
+/**
+ * Pull the first integer out of a frequency string like
+ * "Every 7-10 days" or "Every 4-6 weeks" → returns days.
+ * Weeks are converted to days. Falls back to null if nothing parses.
+ */
+function parseFrequencyDays(text = '') {
+  if (!text) return null;
+  const match = text.match(/(\d+)/);
+  if (!match) return null;
+  const n = parseInt(match[1], 10);
+  return /week/i.test(text) ? n * 7 : n;
+}
+
+/**
+ * Map Gemini's free-text sunlight requirement onto the short keys
+ * sunlightLabel() understands (direct/partial/indirect/low/shade).
+ */
+function inferSunlightKey(text = '') {
+  const t = text.toLowerCase();
+  if (t.includes('indirect')) return 'indirect';
+  if (t.includes('partial'))  return 'partial';
+  if (t.includes('low'))      return 'low';
+  if (t.includes('shade'))    return 'shade';
+  if (t.includes('direct') || t.includes('full')) return 'direct';
+  return '';
+}
+
+/**
+ * Build the fields addPlantToCatalog() needs from a Gemini analysis
+ * object. Any field Gemini didn't provide is simply omitted so
+ * addPlantToCatalog's own defaults (0 / '' / []) apply.
+ */
+function mapAnalysisToCatalogFields(analysis) {
+  if (!analysis) return {};
+
+  const wateringFrequency   = parseFrequencyDays(analysis.wateringGuide?.frequency);
+  const fertilizerFrequency = parseFrequencyDays(analysis.fertilizingGuide?.frequency);
+  const sunlight            = inferSunlightKey(analysis.sunlightGuide?.requirement);
+  const growthDays          = parseFrequencyDays(analysis.growthTimeline?.maturity);
+
+  return {
+    description:          analysis.overview ?? '',
+    sunlight:              sunlight || undefined,
+    wateringFrequency:     wateringFrequency ?? undefined,
+    fertilizerFrequency:   fertilizerFrequency ?? undefined,
+    growthDays:            growthDays ?? undefined,
+    pests:                 Array.isArray(analysis.commonPests) ? analysis.commonPests : undefined,
+  };
+}
+
+export async function saveScanToGarden(userId, plantData, analysis = null, scanId = null) {
+  if (!userId) throw new Error('User must be signed in to save to garden.');
+
+  const statusRaw = (plantData?.healthStatus || '').toUpperCase();
+  const hasAnomaly = plantData?.anomalies && plantData.anomalies !== 'None';
+  const healthStatus = statusRaw.includes('HEALTHY') && !hasAnomaly
+    ? 'HEALTHY'
+    : statusRaw.includes('SICK')
+      ? 'SICK'
+      : 'WARNING';
+
+  const plantName = plantData?.commonName || 'Unknown Plant';
+  let catalogPlant = await findPlantByName(plantName);
+  let plantId = catalogPlant?.id ?? null;
+
+  if (!catalogPlant) {
+    plantId = await addPlantToCatalog({
+      name: plantName,
+      scientificName: plantData?.scientificName,
+      imageUrl: plantData?.imageSrc,
+      ...mapAnalysisToCatalogFields(analysis),
+    });
+  } else {
+    // Existing catalog entry (e.g. created before this fix, or by an
+    // earlier scan that had no analysis yet) — backfill any fields
+    // it's still missing instead of leaving them empty forever.
+    const freshFields = mapAnalysisToCatalogFields(analysis);
+    const missingFields = Object.fromEntries(
+      Object.entries(freshFields).filter(([key, value]) => value !== undefined && !catalogPlant[key])
+    );
+    if (Object.keys(missingFields).length > 0) {
+      await updateDoc(doc(db, 'plants', plantId), missingFields);
+    }
+  }
+
+  const docRef = await addDoc(collection(db, 'userPlants'), {
+    userId,
+    scanId: scanId ?? null,
+    plantId,
+
+    nickname:       plantData?.commonName     || 'My Plant',
+    commonName:     plantData?.commonName     || 'Unknown Plant',
+    scientificName: plantData?.scientificName || '',
+    imageUrl:       plantData?.imageSrc        || '',
+
+    healthStatus,
+    currentStage: 'Early Growth',
+    plantedDate:  serverTimestamp(),
+
+    createdAt: serverTimestamp(),
+  });
+
+  return docRef.id;
 }
 
 
@@ -91,15 +178,7 @@ export async function updatePlantHealth(userPlantId, healthStatus) {
 // 2. REMINDERS  (used as Care Schedule)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Fetch today's reminders for a user.
- *
- * @param {string} userId
- * @returns {Promise<ReminderDoc[]>}
- *
- * ReminderDoc shape:
- * { id, userId, userPlantId, title, type, reminderDate (Timestamp), status, createdAt }
- */
+
 export async function fetchTodayReminders(userId) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
@@ -119,32 +198,15 @@ export async function fetchTodayReminders(userId) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-/**
- * Mark a reminder as COMPLETED.
- *
- * @param {string} reminderId
- * @returns {Promise<void>}
- */
+
 export async function completeReminder(reminderId) {
   await updateDoc(doc(db, 'reminders', reminderId), { status: 'COMPLETED' });
 }
 
-/**
- * Mark a reminder back to PENDING (undo complete).
- *
- * @param {string} reminderId
- * @returns {Promise<void>}
- */
 export async function uncompleteReminder(reminderId) {
   await updateDoc(doc(db, 'reminders', reminderId), { status: 'PENDING' });
 }
 
-/**
- * Create a new reminder.
- *
- * @param {object} data  – { userId, userPlantId, title, type, reminderDate (JS Date) }
- * @returns {Promise<string>}  – new reminderId
- */
 export async function createReminder(data) {
   const ref = await addDoc(collection(db, 'reminders'), {
     ...data,
@@ -160,22 +222,6 @@ export async function createReminder(data) {
 // 3. HEALTH STATS  (derived from userPlants)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Compute garden-wide health analytics from a list of userPlants.
- * Pure function — no Firestore call needed.
- *
- * @param {UserPlantDoc[]} userPlants
- * @returns {GardenStats}
- *
- * GardenStats shape:
- * {
- *   totalPlants:    number,
- *   healthyCount:   number,
- *   warningCount:   number,
- *   sickCount:      number,
- *   healthScorePct: number,   // 0-100
- * }
- */
 export function computeGardenStats(userPlants) {
   const total   = userPlants.length;
   const healthy = userPlants.filter(p => p.healthStatus === 'HEALTHY').length;
@@ -198,27 +244,13 @@ export function computeGardenStats(userPlants) {
 // 4. PLANT CATALOG  (master plants collection)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Fetch all plants from the master catalog.
- *
- * @returns {Promise<PlantDoc[]>}
- *
- * PlantDoc shape:
- * { id, name, scientificName, description, imageUrl, sunlight,
- *   wateringFrequency, fertilizerFrequency, growthDays,
- *   pests, diseases, createdAt }
- */
+
 export async function fetchPlantCatalog() {
   const snap = await getDocs(collection(db, 'plants'));
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-/**
- * Fetch a single plant from the catalog.
- *
- * @param {string} plantId
- * @returns {Promise<PlantDoc|null>}
- */
+
 export async function fetchPlantById(plantId) {
   const snap = await getDoc(doc(db, 'plants', plantId));
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
@@ -230,20 +262,7 @@ export async function fetchPlantById(plantId) {
 //    dashboard needs
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Load all garden dashboard data in parallel.
- *
- * @param {string} userId
- * @returns {Promise<GardenDashboardData>}
- *
- * GardenDashboardData shape:
- * {
- *   userPlants:     UserPlantDoc[],
- *   featuredPlant:  UserPlantDoc|null,
- *   todayReminders: ReminderDoc[],
- *   stats:          GardenStats,
- * }
- */
+
 export async function loadGardenDashboard(userId) {
   const [userPlants, todayReminders] = await Promise.all([
     fetchUserPlants(userId),

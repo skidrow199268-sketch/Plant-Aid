@@ -14,7 +14,7 @@ export default function UpcomingTasks({ upcomingReminders = [] }) {
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-zinc-900">Upcoming</h3>
         <button
-          onClick={() => navigate('/upcoming-preview')}
+          onClick={() => navigate('/task-management')}
           className="text-emerald-700 font-bold text-sm hover:underline transition-all"
         >
           View All

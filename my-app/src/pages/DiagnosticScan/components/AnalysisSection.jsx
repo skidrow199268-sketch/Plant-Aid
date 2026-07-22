@@ -3,7 +3,7 @@ import {
   MdExpandLess,
  
 } from 'react-icons/md';
-
+import {useState} from 'react'
 export default function AnalysisSection({ icon: Icon, title, iconColor = 'text-[#1b6b51]', iconBg = 'bg-[#a6f2d1]', children, defaultOpen = true }) {
   const [open, setOpen] = useState(defaultOpen);
 

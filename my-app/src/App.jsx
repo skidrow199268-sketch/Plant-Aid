@@ -66,7 +66,7 @@ export default function App() {
 
         {/* Growth & Progress Routes */}
         <Route path="/growth" element={<GrowthJourney />} />
-        <Route path="/upcoming-preview" element={<UpcomingPreview />} />
+       
 
         {/* Feature Routes */}
         <Route path="/reminders" element={<RemindersChecklist />} />

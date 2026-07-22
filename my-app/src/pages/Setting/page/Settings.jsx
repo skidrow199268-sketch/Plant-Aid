@@ -92,19 +92,10 @@ export default function PlantAidSettingsView() {
 
   return (
     <>
-      <style>{`
-        @keyframes slideUp {
-          from { transform: translateY(40px); opacity: 0; }
-          to   { transform: translateY(0);    opacity: 1; }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-      `}</style>
+
 
       <div
-        className="min-h-screen flex flex-col font-sans text-[#1a1b22] bg-[#f4f2fd]/60 m-6"
+        className="min-h-screen flex flex-col text-[#1a1b22] bg-[#f4f2fd]/60 m-6"
         style={{ animation: 'fadeIn 0.4s ease-in-out' }}
       >
         <Topbar />

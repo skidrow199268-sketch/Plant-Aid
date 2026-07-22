@@ -16,21 +16,23 @@ import {
   getInitials,
 } from '../services/ProfileService';
 
-import { MdEdit, MdCalendarToday, MdEmail,} from 'react-icons/md';
+import { MdEdit, MdCalendarToday, MdEmail,MdArrowBack} from 'react-icons/md';
 import { IoLeaf } from 'react-icons/io5';
 import { FaSeedling } from 'react-icons/fa6';
-
+import {useNavigate} from 'react-router-dom'
 import {Avatar,EditableField,PasswordSection,StatCard,Toast} from '../components/index'
 
 export default function Profile() {
   const { currentUser } = useAuth();
   const userId = currentUser?.uid ?? null;
-
+  
   const [profile,         setProfile]         = useState(null);
   const [stats,           setStats]           = useState(null);
   const [loading,         setLoading]         = useState(true);
   const [savingName,      setSavingName]      = useState(false);
   const [savingPassword,  setSavingPassword]  = useState(false);
+
+  const navigate = useNavigate()
 
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
   const toastTimer = useRef(null);
@@ -116,11 +118,21 @@ export default function Profile() {
       <div className="block lg:hidden"><MobileNav /></div>
 
       <main className="flex-grow w-full max-w-3xl mx-auto px-4 md:px-6 py-10 pb-28 lg:pb-10 space-y-8">
+        
+        <button
+      onClick={()=> navigate('/dashboard')}
+      className="flex items-center justify-center w-9 h-9 rounded-full bg-white border border-[#c8c5ca]/40 hover:bg-zinc-50 active:scale-90 transition-all"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+    >
+      <MdArrowBack className="text-lg text-[#1a1b22]" />
+    </button>
+
 
         <div className="flex items-center gap-2 text-[#1b6b51]">
           <IoLeaf className="text-base" />
           <span className="text-xs font-bold uppercase tracking-widest">Account</span>
         </div>
+
 
         {/* Hero card */}
         <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-neutral-200/60 dark:border-zinc-700/60 p-6 shadow-[0_4px_20px_rgb(0,0,0,0.02)] dark:shadow-zinc-900/20 flex flex-col sm:flex-row items-start sm:items-center gap-6">

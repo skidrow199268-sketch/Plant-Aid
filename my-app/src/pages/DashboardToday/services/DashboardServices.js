@@ -23,28 +23,6 @@ import { db } from '../../../firebase/firebase';
 // 1. WEATHER  (OpenWeatherMap – or any API with VITE_WEATHER_API)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Fetch current weather for a given lat/lon.
- * Returns a normalised object so the UI never touches raw API shapes.
- *
- * @param {number} lat
- * @param {number} lon
- * @returns {Promise<WeatherData>}
- *
- * WeatherData shape:
- * {
- *   temp:        number,      // Celsius
- *   feelsLike:   number,
- *   humidity:    number,      // %
- *   description: string,      // e.g. "Partly cloudy"
- *   icon:        string,      // OpenWeather icon code, e.g. "02d"
- *   cityName:    string,
- *   wind:        number,      // m/s
- *   isRainy:     boolean,
- *   isSunny:     boolean,
- *   isHumid:     boolean,     // humidity >= 70
- * }
- */
 export async function fetchWeather(lat, lon) {
   const apiKey = import.meta.env.VITE_WEATHER_API;
   const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
@@ -73,12 +51,7 @@ export async function fetchWeather(lat, lon) {
   };
 }
 
-/**
- * Tiny helper – resolves the user's position via browser Geolocation API.
- * Falls back to Manila, PH if permission is denied.
- *
- * @returns {Promise<{ lat: number, lon: number }>}
- */
+
 export function getUserLocation() {
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
@@ -93,13 +66,7 @@ export function getUserLocation() {
   });
 }
 
-/**
- * Generate a botanical insight tip based on weather data.
- * Pure function – no API call needed.
- *
- * @param {object} weather  – result of fetchWeather()
- * @returns {string}
- */
+
 export function getBotanicalInsight(weather) {
   if (!weather) return 'Check on your plants today and make sure they have enough light and water.';
 
@@ -126,16 +93,6 @@ export function getBotanicalInsight(weather) {
 // 2. REMINDERS
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Fetch PENDING reminders for a user, ordered by reminderDate.
- *
- * @param {string} userId
- * @param {number} [maxItems=10]
- * @returns {Promise<ReminderDoc[]>}
- *
- * ReminderDoc shape (matches Firestore schema):
- * { id, userId, userPlantId, title, type, reminderDate (Timestamp), status, createdAt }
- */
 export async function fetchUpcomingReminders(userId) {
   const q = query(
     collection(db, 'reminders'),
@@ -148,12 +105,7 @@ export async function fetchUpcomingReminders(userId) {
   const snap = await getDocs(q);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
-/**
- * Fetch today's reminders only (midnight → 23:59 today).
- *
- * @param {string} userId
- * @returns {Promise<ReminderDoc[]>}
- */
+
 export async function fetchTodayReminders(userId) {
   const start = new Date();
   start.setHours(0, 0, 0, 0);
@@ -173,12 +125,7 @@ export async function fetchTodayReminders(userId) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-/**
- * Mark a reminder as COMPLETED.
- *
- * @param {string} reminderId
- * @returns {Promise<void>}
- */
+
 export async function completeReminder(reminderId) {
   await updateDoc(doc(db, 'reminders', reminderId), { status: 'COMPLETED' });
 }
@@ -198,16 +145,7 @@ export async function missReminder(reminderId) {
 // 3. USER PLANTS (for daily care list)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Fetch all userPlants belonging to a user.
- *
- * @param {string} userId
- * @returns {Promise<UserPlantDoc[]>}
- *
- * UserPlantDoc shape (matches Firestore schema):
- * { id, userId, plantId, nickname, plantedDate, currentStage,
- *   healthStatus, imageUrl, latitude, longitude, createdAt }
- */
+
 export async function fetchUserPlants(userId) {
   const q = query(
     collection(db, 'userPlants'),
@@ -219,24 +157,13 @@ export async function fetchUserPlants(userId) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-/**
- * Fetch a single userPlant document by its ID.
- *
- * @param {string} userPlantId
- * @returns {Promise<UserPlantDoc|null>}
- */
+
 export async function fetchUserPlantById(userPlantId) {
   const snap = await getDoc(doc(db, 'userPlants', userPlantId));
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-/**
- * Update the health status of a userPlant.
- *
- * @param {string} userPlantId
- * @param {'HEALTHY'|'WARNING'|'SICK'} healthStatus
- * @returns {Promise<void>}
- */
+
 export async function updatePlantHealth(userPlantId, healthStatus) {
   await updateDoc(doc(db, 'userPlants', userPlantId), { healthStatus });
 }
@@ -246,16 +173,7 @@ export async function updatePlantHealth(userPlantId, healthStatus) {
 // 4. JOURNALS (latest entries for the dashboard)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Fetch the most recent journal entries for a user.
- *
- * @param {string} userId
- * @param {number} [maxItems=5]
- * @returns {Promise<JournalDoc[]>}
- *
- * JournalDoc shape:
- * { id, userId, userPlantId, title, content, imageUrl, createdAt, updatedAt }
- */
+
 export async function fetchRecentJournals(userId, maxItems = 5) {
   const q = query(
     collection(db, 'journals'),
@@ -273,17 +191,7 @@ export async function fetchRecentJournals(userId, maxItems = 5) {
 // 5. IDENTIFICATION HISTORY
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Fetch recent plant identification scans for a user.
- *
- * @param {string} userId
- * @param {number} [maxItems=5]
- * @returns {Promise<ScanDoc[]>}
- *
- * ScanDoc shape:
- * { id, userId, plantId, imageUrl, commonName, scientificName,
- *   confidence, scannedAt }
- */
+
 export async function fetchIdentificationHistory(userId, maxItems = 5) {
   const q = query(
     collection(db, 'identificationHistory'),
@@ -301,21 +209,7 @@ export async function fetchIdentificationHistory(userId, maxItems = 5) {
 // 6. AGGREGATE – single call that loads everything the dashboard needs
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Load all dashboard data in parallel.
- * Call this once on mount with the authenticated userId.
- *
- * @param {string} userId
- * @returns {Promise<DashboardData>}
- *
- * DashboardData shape:
- * {
- *   userPlants:   UserPlantDoc[],
- *   todayReminders:    ReminderDoc[],
- *   upcomingReminders: ReminderDoc[],
- *   recentJournals:    JournalDoc[],
- * }
- */
+
 export async function loadDashboardData(userId) {
   const [userPlants, todayReminders, upcomingReminders, recentJournals] =
     await Promise.all([

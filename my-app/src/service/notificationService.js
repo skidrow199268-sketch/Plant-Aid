@@ -145,7 +145,7 @@ export async function checkAndNotifyOverdueReminders(reminders, { userId, toEmai
       }
 
       const { date, time } = formatReminderDateTime(reminder.reminderDate);
-console.log('OVERDUE EMAIL DEBUG:', { toEmail, toName, reminderId: reminder.id });
+
       await emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,

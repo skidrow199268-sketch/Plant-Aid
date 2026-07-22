@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import * as Md from 'react-icons/md';
-import {fetchPlantCatalog,} from '../services/GardenService';
+import {fetchPlantCatalog,} from '../services/GardenService.js';
 
 import {
   collection,

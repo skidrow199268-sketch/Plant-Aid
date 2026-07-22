@@ -6,17 +6,17 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="bg-white dark:bg-[#1a1a1a] w-full px-8 py-6 mt-auto border-t border-zinc-200/60 dark:border-zinc-700/60 flex flex-col sm:flex-row sm:items-center sm:justify-between items-center gap-4 sm:gap-3">
-        <div className="flex items-center gap-2">
+      <footer className="bg-white dark:bg-[#1a1a1a] w-full px-6 sm:px-8 py-6 mt-auto border-t mb-auto md:mb-0 border-zinc-200/60 dark:border-zinc-700/60 flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 shrink-0">
           <IoLeaf className="text-emerald-700 text-[18px]" />
           <span className="text-[15px] font-medium tracking-tight text-zinc-900 dark:text-zinc-100">
             PlantAid
           </span>
         </div>
 
-        <div className="flex items-center gap-5 flex-wrap justify-center">
-          
-            <a href="/auth/register"
+        <div className="flex items-center gap-x-3 gap-y-2 flex-wrap justify-center order-3 sm:order-none">
+          <a
+            href="/auth/register"
             className="text-xs text-zinc-400 hover:text-emerald-700 transition-colors duration-150"
           >
             Sign up
@@ -39,7 +39,7 @@ export default function Footer() {
           </button>
         </div>
 
-        <p className="text-[11px] text-zinc-400/50 sm:text-right">
+        <p className="text-[11px] text-zinc-400/50 text-center sm:text-right shrink-0">
           © {new Date().getFullYear()} PlantAid. Botanical Precision.
         </p>
       </footer>

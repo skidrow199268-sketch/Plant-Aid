@@ -1,95 +1,143 @@
-import React from 'react';
-import { MdEco, MdVerifiedUser, MdLibraryAdd } from 'react-icons/md';
+import { MdEco, MdVerifiedUser, MdLibraryAdd, MdClose } from 'react-icons/md';
+import { IoLeaf } from 'react-icons/io5';
+import {getStatusConfig} from '../utils/getStatusConfig'
+// Dynamic badge coloring based on health status string —
+// mirrors the design language used in getHealthConfig() elsewhere in the app.
 
 
-
-export default function ScanSuccessModal({ isOpen, onClose, onSave, plantData }) {
+export default function ScanSuccessModal({ isOpen, onClose, onSave, plantData, saving, analysisLoading }) {
   if (!isOpen) return null;
 
-  // Use real data passed in, with fallbacks
   const plantInfo = {
     name: plantData?.commonName || 'Unknown Plant',
     scientificName: plantData?.scientificName || '',
     imageSrc: plantData?.imageSrc || '',
-    confidence: plantData?.confidence || 0,
+    confidence: Math.min(100, Math.max(0, plantData?.confidence || 0)),
     healthStatus: plantData?.healthStatus || 'Unknown',
     anomalies: plantData?.anomalies || 'None',
   };
 
-  const radius = 80;
+  const statusCfg = getStatusConfig(plantInfo.healthStatus);
+
+  const radius = 76;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (plantInfo.confidence / 100) * circumference;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 antialiased font-sans">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 antialiased"
+      style={{ fontFamily: "'Manrope', sans-serif" }}
+    >
       <div className="absolute inset-0" onClick={onClose} />
-      {/* Added max-h-[95vh] and overflow-y-auto for short screen scrolling */}
-      <div className="relative w-full max-w-xl max-h-[95vh] overflow-y-auto bg-white dark:bg-[#1a1a1a] rounded-3xl p-6 md:p-8 border border-[#c8c5ca] dark:border-zinc-700 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] dark:shadow-zinc-900/20 z-10 animate-in fade-in zoom-in-95 duration-200">
-        
-        {/* Added z-20 to ensure it stays above stacked content */}
-        <button onClick={onClose} className="absolute top-4 right-4 z-20 text-gray-400 hover:text-black font-bold text-xl px-2">
-          ✕
+
+      <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto bg-white dark:bg-zinc-900 rounded-3xl p-6 md:p-7 border border-[#c8c5ca]/40 dark:border-zinc-700/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.15)] z-10 animate-in fade-in zoom-in-95 duration-200">
+
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:text-black hover:bg-zinc-100 dark:hover:bg-zinc-800 dark:hover:text-white transition-colors"
+          aria-label="Close"
+        >
+          <MdClose className="text-lg" />
         </button>
 
-        {/* Plant header: Switched to flex-col on mobile, flex-row on sm screens. Added top margin for mobile close button clearance. */}
-        <section className="flex flex-col sm:flex-row items-center text-center sm:text-left gap-4 sm:gap-6 mb-6 mt-6 sm:mt-0">
-          <div className="w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden border border-[#c8c5ca] bg-zinc-100">
-            {plantInfo.imageSrc
-              ? <img className="w-full h-full object-cover" src={plantInfo.imageSrc} alt={plantInfo.name} />
-              : <div className="w-full h-full flex items-center justify-center text-zinc-300 text-4xl">🌿</div>
-            }
+        {/* Plant header */}
+        <section className="flex flex-col items-center text-center gap-3 mb-6 mt-2">
+          <div className="w-20 h-20 flex-shrink-0 rounded-2xl overflow-hidden border border-[#c8c5ca]/40 bg-zinc-100">
+            {plantInfo.imageSrc ? (
+              <img className="w-full h-full object-cover" src={plantInfo.imageSrc} alt={plantInfo.name} />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <IoLeaf className="text-3xl text-zinc-300" />
+              </div>
+            )}
           </div>
-          {/* Alignment wrapper for text */}
-          <div className="flex flex-col justify-center items-center sm:items-start">
-            <h2 className="text-2xl font-bold text-black dark:text-white">{plantInfo.name}</h2>
-            <p className="text-lg text-[#1b6b51] font-medium italic">{plantInfo.scientificName}</p>
+
+          <div className="flex flex-col items-center">
+            <p className="text-[10px] font-bold text-[#1b6b51] uppercase tracking-widest mb-1">Identified</p>
+            <h2
+              className="text-xl font-extrabold text-black dark:text-white leading-tight"
+              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+            >
+              {plantInfo.name}
+            </h2>
+            {plantInfo.scientificName && (
+              <p className="text-sm italic text-[#47464a] dark:text-zinc-400 mt-0.5">{plantInfo.scientificName}</p>
+            )}
           </div>
         </section>
 
         {/* Confidence ring */}
-        <section className="flex flex-col items-center justify-center mb-8 sm:mb-10">
+        <section className="flex flex-col items-center justify-center mb-7">
           <div className="relative flex items-center justify-center">
-            <svg className="w-48 h-48 -rotate-90">
-              <circle className="text-[#eeedf7]" cx="96" cy="96" fill="transparent" r={radius} stroke="currentColor" strokeWidth="12" />
-              <circle cx="96" cy="96" fill="transparent" r={radius} stroke="#1b6b51" strokeLinecap="round" strokeWidth="12"
-                style={{ strokeDasharray: circumference, strokeDashoffset, transition: 'stroke-dashoffset 1.5s ease-out' }}
+            <svg className="w-44 h-44 -rotate-90">
+              <defs>
+                <linearGradient id="confidenceGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#1b6b51" />
+                  <stop offset="100%" stopColor="#2dd4a7" />
+                </linearGradient>
+              </defs>
+              <circle
+                className="text-zinc-100 dark:text-zinc-800"
+                cx="88"
+                cy="88"
+                fill="transparent"
+                r={radius}
+                stroke="currentColor"
+                strokeWidth="10"
+              />
+              <circle
+                cx="88"
+                cy="88"
+                fill="transparent"
+                r={radius}
+                stroke="url(#confidenceGradient)"
+                strokeLinecap="round"
+                strokeWidth="10"
+                style={{ strokeDasharray: circumference, strokeDashoffset, transition: 'stroke-dashoffset 1.2s ease-out' }}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="text-3xl font-bold text-[#1b6b51]">{plantInfo.confidence}%</span>
-              <span className="text-xs text-[#47464a] uppercase tracking-wider font-semibold">Confidence Match</span>
+              <span className="text-2xl font-extrabold text-[#1b6b51]">{plantInfo.confidence}%</span>
+              <span className="text-[10px] text-[#47464a] uppercase tracking-widest font-bold mt-0.5">Confidence</span>
             </div>
           </div>
         </section>
 
         {/* Health metrics */}
-        <section className="space-y-3 mb-6">
-          <div className="flex items-center p-3 bg-[#a6f2d1]/20 rounded-xl border border-[#a6f2d1]/30">
-            <div className="w-10 h-10 rounded-lg bg-[#a6f2d1] flex items-center justify-center mr-3 flex-shrink-0">
-              <MdEco className="text-[24px] text-[#00513b]" />
+        <section className="space-y-2.5 mb-6">
+          <div className={`flex items-center p-3 rounded-2xl border border-transparent ${statusCfg.bg}`}>
+            <div className={`w-9 h-9 rounded-xl ${statusCfg.iconBg} flex items-center justify-center mr-3 flex-shrink-0`}>
+              <MdEco className={`text-lg ${statusCfg.iconColor}`} />
             </div>
-            <div>
-              <p className="text-xs text-[#47464a]">Health Status</p>
-              <p className="text-lg font-bold text-[#00513b]">{plantInfo.healthStatus}</p>
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold text-[#47464a] uppercase tracking-wide">Health Status</p>
+              <p className={`text-sm font-bold ${statusCfg.text} truncate`}>{plantInfo.healthStatus}</p>
             </div>
           </div>
-          <div className="flex items-center p-3 bg-[#f4f2fd] rounded-xl border border-[#c8c5ca]">
-            <div className="w-10 h-10 rounded-lg bg-[#e3e1ec] flex items-center justify-center mr-3 flex-shrink-0">
-              <MdVerifiedUser className="text-[24px] text-[#47464a]" />
+
+          <div className="flex items-center p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 border border-transparent">
+            <div className="w-9 h-9 rounded-xl bg-zinc-100 dark:bg-zinc-700 flex items-center justify-center mr-3 flex-shrink-0">
+              <MdVerifiedUser className="text-lg text-zinc-500 dark:text-zinc-300" />
             </div>
-            <div>
-              <p className="text-xs text-[#47464a]">Detected Anomalies</p>
-              <p className="text-lg font-bold text-black">{plantInfo.anomalies}</p>
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold text-[#47464a] uppercase tracking-wide">Detected Anomalies</p>
+              <p className="text-sm font-bold text-black dark:text-white truncate">{plantInfo.anomalies}</p>
             </div>
           </div>
         </section>
 
         {/* Save button */}
         <footer>
-          <button onClick={onSave}
-            className="w-full bg-black text-white font-bold text-lg py-4 rounded-2xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all duration-200">
-            <MdLibraryAdd className="text-[22px]" />
-            <span className="truncate">Save to My Garden Catalog</span>
+          <button
+            onClick={onSave}
+            disabled={analysisLoading || saving}
+            className="w-full bg-black text-white font-bold text-sm py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+          >
+            <MdLibraryAdd className="text-lg" />
+            <span className="truncate">
+              {analysisLoading ? 'Analyzing plant…' : saving ? 'Saving…' : 'Save to My Garden'}
+            </span>
           </button>
         </footer>
       </div>

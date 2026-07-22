@@ -5,6 +5,10 @@
 // USAGE in DiagnosticScan.jsx:
 //   import { PlantAnalysisCard } from './PlantAnalysisCard';
 //   <PlantAnalysisCard analysis={analysis} loading={analysisLoading} error={analysisError} />
+//
+// CHANGED (classification feature): added a Classification block
+// (Plant Type / Category / Family / Genus) right after the overview,
+// before the Care Guide grid.
 
 import React, { useState } from 'react';
 import { getDifficultyConfig } from '../services/PlantAnalysis';
@@ -28,6 +32,7 @@ import {
   MdExpandMore,
   MdExpandLess,
   MdAutoAwesome,
+  MdCategory,
 } from 'react-icons/md';
 import { IoLeaf } from 'react-icons/io5';
 import { FaSeedling } from 'react-icons/fa6';
@@ -121,6 +126,32 @@ export function PlantAnalysisCard({ analysis, loading, error }) {
             </ul>
           </div>
         )}
+      </div>
+
+      {/* NEW: Classification card — Plant Type / Category / Family / Genus */}
+      <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-[#c8c5ca]/40 dark:border-zinc-700/50 p-6 shadow-[0_8px_30px_rgba(0,0,0,0.03)] dark:shadow-zinc-900/20 space-y-3">
+        <div className="flex items-center gap-2 text-[#1b6b51]">
+          <MdCategory className="text-lg" />
+          <span className="text-xs font-bold uppercase tracking-widest">Classification</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60">
+            <p className="text-[10px] font-bold text-[#47464a] uppercase tracking-widest mb-1">Plant Type</p>
+            <p className="text-sm font-bold text-black dark:text-white">{analysis.plantType || 'Unknown'}</p>
+          </div>
+          <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60">
+            <p className="text-[10px] font-bold text-[#47464a] uppercase tracking-widest mb-1">Category</p>
+            <p className="text-sm font-bold text-black dark:text-white">{analysis.category || 'Unknown'}</p>
+          </div>
+          <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60">
+            <p className="text-[10px] font-bold text-[#47464a] uppercase tracking-widest mb-1">Family</p>
+            <p className="text-sm font-bold italic text-black dark:text-white">{analysis.family || 'Unknown'}</p>
+          </div>
+          <div className="p-3 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60">
+            <p className="text-[10px] font-bold text-[#47464a] uppercase tracking-widest mb-1">Genus</p>
+            <p className="text-sm font-bold italic text-black dark:text-white">{analysis.genus || 'Unknown'}</p>
+          </div>
+        </div>
       </div>
 
       {/* Care guide grid — 2 columns on md+ */}
