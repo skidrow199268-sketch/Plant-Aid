@@ -116,7 +116,11 @@ useEffect(() => {
   // ── Available categories from current catalog ─────────────
   const availableCategories = ['All Plants', ...Array.from(
     new Set(plants.map(inferCategory))
-  ).sort()];
+  ).sort((a, b) => {
+    if (a === 'Other') return 1;
+    if (b === 'Other') return -1;
+    return a.localeCompare(b);
+  })];
 
    const visiblePlants = filteredPlants.slice(0, visibleCount);
 
