@@ -8,7 +8,7 @@ export const STATUS_THEMES = {
     Icon:  MdCheckCircle,
   },
   danger: {
-    badge: 'bg-[#ffdad6] text-[#93000a] border-[#ffdad6]',
+    badge: 'bg-red-100 text-red-600 border-red-100',
     Icon:  MdWarning,
   },
   neutral: {

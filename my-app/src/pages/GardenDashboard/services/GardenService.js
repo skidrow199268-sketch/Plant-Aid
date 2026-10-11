@@ -25,42 +25,65 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
 import { findPlantByName, addPlantToCatalog } from '../../PlantDirectory/services/PlantService';
+import {
+  remoteThenLocal,
+  remoteThenLocalDoc,
+  createDocOnlineFirst,
+  updateDocOnlineFirst,
+  getActiveUserId,
+} from '../../../offline/offlineStore';
 
 // ─────────────────────────────────────────────────────────────
 // 1. USER PLANTS
 // ─────────────────────────────────────────────────────────────
 
+const sortByCreatedDesc = (docs) =>
+  [...docs].sort((a, b) => {
+    const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+    const db_ = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+    return db_ - da;
+  });
+
 export async function fetchUserPlants(userId) {
-  const q = query(
-    collection(db, 'userPlants'),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const docs = await remoteThenLocal(userId, 'userPlants', async () => {
+    const q = query(
+      collection(db, 'userPlants'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  });
+  return sortByCreatedDesc(docs);
 }
 
 export async function fetchUserPlantById(userPlantId) {
-  const snap = await getDoc(doc(db, 'userPlants', userPlantId));
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  const userId = getActiveUserId();
+  return remoteThenLocalDoc(userId, 'userPlants', userPlantId, async () => {
+    const snap = await getDoc(doc(db, 'userPlants', userPlantId));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  });
 }
 
 
 export async function fetchFeaturedPlant(userId) {
-  const q = query(
-    collection(db, 'userPlants'),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(1),
-  );
-  const snap = await getDocs(q);
-  if (snap.empty) return null;
-  const d = snap.docs[0];
-  return { id: d.id, ...d.data() };
+  const docs = await remoteThenLocal(userId, 'userPlants', async () => {
+    const q = query(
+      collection(db, 'userPlants'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+      limit(1),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  });
+  const sorted = sortByCreatedDesc(docs);
+  return sorted[0] ?? null;
 }
 
 export async function updatePlantHealth(userPlantId, healthStatus) {
-  await updateDoc(doc(db, 'userPlants', userPlantId), { healthStatus });
+  const userId = getActiveUserId();
+  await updateDocOnlineFirst(userId, 'userPlants', userPlantId, { healthStatus });
 }
 
 
@@ -180,41 +203,65 @@ export async function saveScanToGarden(userId, plantData, analysis = null, scanI
 
 
 export async function fetchTodayReminders(userId) {
+  const docs = await remoteThenLocal(userId, 'reminders', async () => {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const q = query(
+      collection(db, 'reminders'),
+      where('userId',       '==', userId),
+      where('reminderDate', '>=', Timestamp.fromDate(start)),
+      where('reminderDate', '<=', Timestamp.fromDate(end)),
+      orderBy('reminderDate', 'asc'),
+    );
+
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  });
+
   const start = new Date();
   start.setHours(0, 0, 0, 0);
-
   const end = new Date();
   end.setHours(23, 59, 59, 999);
 
-  const q = query(
-    collection(db, 'reminders'),
-    where('userId',       '==', userId),
-    where('reminderDate', '>=', Timestamp.fromDate(start)),
-    where('reminderDate', '<=', Timestamp.fromDate(end)),
-    orderBy('reminderDate', 'asc'),
-  );
-
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return docs
+    .filter((r) => {
+      const d = r.reminderDate?.toDate ? r.reminderDate.toDate() : new Date(r.reminderDate);
+      return d >= start && d <= end;
+    })
+    .sort((a, b) => {
+      const da = a.reminderDate?.toDate ? a.reminderDate.toDate() : new Date(a.reminderDate);
+      const db_ = b.reminderDate?.toDate ? b.reminderDate.toDate() : new Date(b.reminderDate);
+      return da - db_;
+    });
 }
 
 
 export async function completeReminder(reminderId) {
-  await updateDoc(doc(db, 'reminders', reminderId), { status: 'COMPLETED' });
+  const userId = getActiveUserId();
+  await updateDocOnlineFirst(userId, 'reminders', reminderId, { status: 'COMPLETED' });
 }
 
 export async function uncompleteReminder(reminderId) {
-  await updateDoc(doc(db, 'reminders', reminderId), { status: 'PENDING' });
+  const userId = getActiveUserId();
+  await updateDocOnlineFirst(userId, 'reminders', reminderId, { status: 'PENDING' });
 }
 
 export async function createReminder(data) {
-  const ref = await addDoc(collection(db, 'reminders'), {
+  const payload = {
     ...data,
-    reminderDate: Timestamp.fromDate(data.reminderDate),
-    status: 'PENDING',
-    createdAt: serverTimestamp(),
-  });
-  return ref.id;
+    reminderDate: data.reminderDate instanceof Date
+      ? Timestamp.fromDate(data.reminderDate)
+      : data.reminderDate,
+    status:    'PENDING',
+    completed: false,
+    createdAt: Timestamp.now(),
+  };
+  const created = await createDocOnlineFirst(data.userId, 'reminders', payload);
+  return created.id;
 }
 
 
@@ -246,14 +293,20 @@ export function computeGardenStats(userPlants) {
 
 
 export async function fetchPlantCatalog() {
-  const snap = await getDocs(collection(db, 'plants'));
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const userId = getActiveUserId();
+  return remoteThenLocal(userId, 'plants', async () => {
+    const snap = await getDocs(collection(db, 'plants'));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  });
 }
 
 
 export async function fetchPlantById(plantId) {
-  const snap = await getDoc(doc(db, 'plants', plantId));
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  const userId = getActiveUserId();
+  return remoteThenLocalDoc(userId, 'plants', plantId, async () => {
+    const snap = await getDoc(doc(db, 'plants', plantId));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  });
 }
 
 

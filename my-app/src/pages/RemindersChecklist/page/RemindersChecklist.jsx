@@ -100,7 +100,7 @@ export default function RemindersChecklist() {
   if (loading) return <FullPageLoader message="Loading today's tasks" />;
 
   return (
-    <div className="bg-neutral-50 pb-20 lg:pb-8 text-neutral-900 min-h-screen flex flex-col" style={{ fontFamily: 'Manrope, sans-serif' }}>
+    <div className="bg-[#fbf8ff] pb-28 md:pb-8 text-neutral-900 min-h-screen flex flex-col">
   <div className="hidden md:block">
   <SectionHeader />
 </div>
@@ -110,11 +110,11 @@ export default function RemindersChecklist() {
   <MobileSectionNav />
 </div>
 
-      <main className="flex-grow w-full max-w-lg mx-auto px-5 py-10">
+      <main className="flex-grow w-full max-w-lg mx-auto px-4 md:px-6 py-10">
         <div className="flex items-end justify-between mb-6">
           <div>
-            <p className="text-xs text-neutral-400 font-medium mb-0.5">{TODAY}</p>
-            <h1 className="text-xl font-bold text-neutral-900 tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Today's Tasks</h1>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#1b6b51] mb-0.5">{TODAY}</p>
+            <h1 className="text-3xl font-extrabold text-neutral-900 tracking-tight">Today's Tasks</h1>
           </div>
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full transition-opacity duration-300 ${remainingCount === 0 ? 'opacity-0' : 'opacity-100'}`} style={{ background: '#e6f9f1', color: '#0f6e56' }}>
             {remainingCount} remaining
@@ -128,7 +128,7 @@ export default function RemindersChecklist() {
             </div>
             <p className="text-base font-bold text-[#1b6b51] mb-1">All caught up!</p>
             <p className="text-sm text-neutral-500">Your garden is thriving today.</p>
-            <button onClick={() => setShowModal(true)} className="mt-4 flex items-center gap-1.5 px-4 py-2 bg-[#1b6b51] text-white text-xs font-bold rounded-xl hover:bg-[#164f3c] active:scale-95 transition-all" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <button onClick={() => setShowModal(true)} className="mt-4 flex items-center gap-1.5 px-4 py-2 bg-[#1b6b51] text-white text-xs font-bold rounded-xl hover:bg-[#164f3c] active:scale-95 transition-all">
               <MdAddCircleOutline className="text-sm" />
               Add a reminder
             </button>

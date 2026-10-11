@@ -6,7 +6,7 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="bg-white dark:bg-[#1a1a1a] w-full px-6 sm:px-8 py-6 mt-auto border-t mb-auto md:mb-0 border-zinc-200/60 dark:border-zinc-700/60 flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <footer className="bg-white dark:bg-[#1a1a1a] w-full px-4 sm:px-8 py-6 mt-auto border-t border-zinc-200/60 dark:border-zinc-700/60 flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2 shrink-0">
           <IoLeaf className="text-emerald-700 text-[18px]" />
           <span className="text-[15px] font-medium tracking-tight text-zinc-900 dark:text-zinc-100">

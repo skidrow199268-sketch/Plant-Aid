@@ -84,7 +84,7 @@ export default function DashboardToday() {
   }
 
   return (
-    <div className="bg-zinc-50 text-zinc-800 pb-20 lg:pb-8 min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="bg-[#fbf8ff] text-[#1a1b22] pb-28 md:pb-8 min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
       <Topbar/>
       <div className="block md:hidden">
   <MobileNav />
@@ -92,11 +92,12 @@ export default function DashboardToday() {
 
       <main className="flex-grow max-w-7xl mx-auto px-4 md:px-6 py-10 w-full ">
         {/* Editorial Header */}
-        <header className="mb-8 space-y-1">
-          <h1 className="text-4xl font-extrabold text-zinc-900 tracking-tight md:text-5xl">
+        <header className="mb-8 space-y-2">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-[#1b6b51]">Today</p>
+          <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">
             {greeting}, {firstName}.
           </h1>
-          <p className="text-base font-medium text-zinc-400">
+          <p className="text-sm text-[#47464a]">
             {new Date().toLocaleDateString('en-US', {
               weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
             })}

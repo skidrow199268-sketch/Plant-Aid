@@ -19,7 +19,7 @@ export default function JournalCard({ entry, onDelete, onEdit }) {
           <MdCalendarToday className="text-[11px]" />
           {formatJournalDate(entry.createdAt)}
         </span>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+        <div className="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all">
           <button
             onClick={() => onEdit(entry)}
             className="p-1.5 hover:bg-zinc-100 hover:text-zinc-800 rounded-lg transition-all text-neutral-400"

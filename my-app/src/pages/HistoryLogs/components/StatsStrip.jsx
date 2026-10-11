@@ -22,8 +22,8 @@ export default function StatsStrip({ stats }) {
       label: 'Diseased',
       value: stats.diseased,
       Icon:  MdWarning,
-      color: 'text-[#93000a]',
-      bg:    'bg-[#ffdad6]',
+      color: 'text-red-600',
+      bg:    'bg-red-100',
     },
     {
       label: 'Identified',
@@ -35,7 +35,7 @@ export default function StatsStrip({ stats }) {
   ];
 
   return (
-    <div className="bg-white border border-neutral-200/60 rounded-[28px] mb-8 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.06)] grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-neutral-100 overflow-hidden">
+    <div className="bg-white border border-[#c8c5ca]/60 rounded-[28px] mb-8 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.06)] grid grid-cols-2 md:grid-cols-4 divide-x divide-y md:divide-y-0 divide-[#eeedf7] overflow-hidden">
       {items.map(({ label, value, Icon, color, bg }) => (
         <div
           key={label}

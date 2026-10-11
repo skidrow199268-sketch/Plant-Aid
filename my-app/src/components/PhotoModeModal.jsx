@@ -21,7 +21,7 @@ export default function PhotoModeModal({ open, onSelect, onClose }) {
         className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl p-5 space-y-4"
       >
         <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold text-black dark:text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <h3 className="text-base font-bold text-black dark:text-white">
             Scan Accuracy
           </h3>
           <button

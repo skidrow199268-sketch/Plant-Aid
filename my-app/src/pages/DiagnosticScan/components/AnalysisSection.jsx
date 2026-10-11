@@ -17,7 +17,7 @@ export default function AnalysisSection({ icon: Icon, title, iconColor = 'text-[
           <div className={`w-8 h-8 rounded-xl ${iconBg} ${iconColor} flex items-center justify-center flex-shrink-0`}>
             <Icon className="text-base" />
           </div>
-          <span className="text-sm font-bold text-black dark:text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <span className="text-sm font-bold text-black dark:text-white">
             {title}
           </span>
         </div>

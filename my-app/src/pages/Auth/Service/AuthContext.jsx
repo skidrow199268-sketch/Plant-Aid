@@ -13,6 +13,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../../firebase/firebase';
+import { setActiveUserId } from '../../../offline/offlineStore';
 
 const AuthContext = createContext(null);
 
@@ -79,6 +80,7 @@ export function AuthProvider({ children }) {
       setUserProfile(profile);
       return user;
     } catch (err) {
+      console.error('[Google sign-in]', err.code, err.message);
       setAuthError(friendlyError(err.code));
       throw err;
     }
@@ -92,6 +94,7 @@ export function AuthProvider({ children }) {
       setUserProfile(profile);
       return user;
     } catch (err) {
+      console.error('[GitHub sign-in]', err.code, err.message);
       setAuthError(friendlyError(err.code));
       throw err;
     }
@@ -129,6 +132,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      setActiveUserId(user?.uid ?? null);
       await loadUserProfile(user);
       setLoading(false);
     });
@@ -188,16 +192,24 @@ export function ProtectedRoute({ redirectTo = '/auth/login' }) {
 
 function friendlyError(code) {
   const map = {
-    'auth/user-not-found':       'No account found with that email.',
-    'auth/wrong-password':       'Incorrect password. Please try again.',
-    'auth/invalid-credential':   'Invalid email or password.',
-    'auth/email-already-in-use': 'An account with this email already exists.',
-    'auth/weak-password':        'Password must be at least 6 characters.',
-    'auth/invalid-email':        'Please enter a valid email address.',
-    'auth/popup-closed-by-user': 'Sign-in popup was closed before completing.',
-    'auth/too-many-requests':    'Too many attempts. Please wait a moment and try again.',
-    'auth/invalid-action-code':  'This reset link is invalid or has expired.',
-    'auth/expired-action-code':  'This reset link has expired. Please request a new one.',
+    'auth/user-not-found':                    'No account found with that email.',
+    'auth/wrong-password':                    'Incorrect password. Please try again.',
+    'auth/invalid-credential':                'Invalid email or password.',
+    'auth/email-already-in-use':              'An account with this email already exists.',
+    'auth/weak-password':                     'Password must be at least 6 characters.',
+    'auth/invalid-email':                     'Please enter a valid email address.',
+    'auth/popup-closed-by-user':              'Sign-in popup was closed before completing.',
+    'auth/too-many-requests':                 'Too many attempts. Please wait a moment and try again.',
+    'auth/invalid-action-code':               'This reset link is invalid or has expired.',
+    'auth/expired-action-code':               'This reset link has expired. Please request a new one.',
+    'auth/operation-not-allowed':             'This sign-in provider is not enabled in the Firebase console. Go to Authentication > Sign-in method and turn it on.',
+    'auth/unauthorized-domain':               'This sign-in method is blocked for this domain. Add the domain under Firebase Authentication > Settings > Authorized domains.',
+    'auth/popup-blocked':                     'The sign-in popup was blocked. Allow popups for this site and try again.',
+    'auth/cancelled-popup-request':           'Another sign-in popup is already open. Close it and try again.',
+    'auth/account-exists-with-different-credential':
+      'An account already exists with this email. Sign in with the original method first.',
+    'auth/credential-already-in-use':         'This GitHub account is already linked to a registered email. Sign in with your email and password instead.',
+    'auth/network-request-failed':            'Network error. Check your connection and try again.',
   };
-  return map[code] ?? 'An unexpected error occurred. Please try again.';
+  return map[code] ?? `An unexpected error occurred. Please try again. (${code || 'unknown'})`;
 }

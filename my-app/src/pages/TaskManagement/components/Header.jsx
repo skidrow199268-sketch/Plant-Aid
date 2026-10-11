@@ -40,7 +40,7 @@ export default function TasksHeader({ setModalOpen }) {
           <IoLeaf className="text-[#1b6b51] text-2xl" />
           <span
             className="text-2xl font-bold text-black dark:text-white tracking-tight"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+           
           >
             PlantAid
           </span>

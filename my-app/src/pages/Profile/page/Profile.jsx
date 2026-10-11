@@ -112,9 +112,9 @@ export default function Profile() {
   return (
     <div
       className="bg-[#fbf8ff] text-[#1a1b22] min-h-screen flex flex-col antialiased selection:bg-[#a6f2d1] selection:text-[#1b6b51]"
-      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+     
     >
-      <div className="hidden lg:block"><Topbar /></div>
+      <div className="hidden md:block"><Topbar /></div>
       <div className="block lg:hidden"><MobileNav /></div>
 
       <main className="flex-grow w-full max-w-3xl mx-auto px-4 md:px-6 py-10 pb-28 lg:pb-10 space-y-8">

@@ -51,7 +51,7 @@ export default function MobileNav({ setModalOpen }) {
           <MdAddCircleOutline className="text-xl text-[#1b6b51]" />
           <span
             className="text-[10px] mt-0.5 font-medium tracking-tight text-[#1b6b51]"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+           
           >
    
           </span>

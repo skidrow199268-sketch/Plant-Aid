@@ -5,6 +5,7 @@ import {
   getUserLocation,
   getBotanicalInsight,
 } from '../../DashboardToday/services/DashboardServices.js';
+import { getSeason, getSeasonalTip } from '../../DashboardToday/utils/season';
 
 
 
@@ -44,6 +45,8 @@ export default function ClimateControlModal({ onClose }) {
   };
 
   const insight = weather ? getBotanicalInsight(weather) : null;
+  const season = weather ? getSeason(weather) : null;
+  const seasonTip = weather ? getSeasonalTip(weather) : '';
 
   return (
     <div
@@ -127,6 +130,12 @@ export default function ClimateControlModal({ onClose }) {
             <div className="bg-[#1b6b51]/20 border border-[#1b6b51]/30 rounded-2xl px-4 py-3">
               <p className="text-[10px] font-bold uppercase tracking-widest text-[#a6f2d1] mb-1">🌿 Botanical Insight</p>
               <p className="text-xs text-white/70 leading-relaxed">{insight}</p>
+            </div>
+          )}
+          {!loading && !error && season && seasonTip && (
+            <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">🗓️ {season.label} Care Tip</p>
+              <p className="text-xs text-white/60 leading-relaxed">{seasonTip}</p>
             </div>
           )}
           {!loading && !error && weather && (

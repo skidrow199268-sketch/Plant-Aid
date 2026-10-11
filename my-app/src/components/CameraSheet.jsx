@@ -204,7 +204,7 @@ export default function CameraSheet({ onClose }) {
             <div className="w-7 h-7 rounded-lg bg-[#a6f2d1] flex items-center justify-center">
               <MdPhotoCamera className="text-[#1b6b51] text-base" />
             </div>
-            <span className="text-base font-bold text-black dark:text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <span className="text-base font-bold text-black dark:text-white">
               Quick Scan
             </span>
           </div>

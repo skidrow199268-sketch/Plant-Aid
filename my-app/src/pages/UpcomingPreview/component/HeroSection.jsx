@@ -32,15 +32,11 @@ export default function HeroSection() {
       </div>
       
       {/* Text Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex flex-col justify-end p-10">
+      <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex flex-col justify-end p-6 sm:p-10">
         <div className="pointer-events-none">
           <h1
             className="text-white font-bold mb-1"
-            style={{
-              fontFamily: "'Plus Jakarta Sans', sans-serif",
-              fontSize: 'clamp(28px, 5vw, 48px)',
-              letterSpacing: '-0.05em',
-            }}
+            style={{ fontSize: 'clamp(28px, 5vw, 48px)', letterSpacing: '-0.05em' }}
           >
             Daily Botanical Pulse
           </h1>

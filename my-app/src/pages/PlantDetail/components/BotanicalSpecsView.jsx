@@ -27,22 +27,22 @@ export default function BotanicalSpecsView({ masterPlant }) {
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <div>
-        <h3 className="text-xl font-serif font-semibold text-[#212B22] tracking-tight">Botanical Specs</h3>
-        <p className="text-xs text-[#6E7568] font-mono mt-0.5">Classification and care reference data</p>
+        <h3 className="text-xl font-semibold text-[#1a1b22] tracking-tight">Botanical Specs</h3>
+        <p className="text-xs text-[#47464a] mt-0.5">Classification and care reference data</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {sections.map((section) => (
-          <div key={section.title} className="bg-white border border-[#E4E1D3] rounded-md p-6 hover:border-[#3F6B4A] transition-colors duration-150">
-            <p className="text-xs font-bold text-[#6E7568] uppercase tracking-widest font-mono mb-4">{section.title}</p>
+          <div key={section.title} className="bg-white border border-[#c8c5ca] rounded-md p-6 hover:border-[#1b6b51] transition-colors duration-150">
+            <p className="text-xs font-bold text-[#47464a] uppercase tracking-widest mb-4">{section.title}</p>
             <dl className="space-y-0">
               {section.rows.map(({ label, value }, i) => (
                 <div key={label}
                   className={`flex items-center justify-between py-3 ${
-                    i < section.rows.length - 1 ? 'border-b border-[#E4E1D3]' : ''
+                    i < section.rows.length - 1 ? 'border-b border-[#c8c5ca]' : ''
                   }`}>
-                  <dt className="text-sm text-[#6E7568]">{label}</dt>
-                  <dd className="text-sm font-bold text-[#212B22]">{value}</dd>
+                  <dt className="text-sm text-[#47464a]">{label}</dt>
+                  <dd className="text-sm font-bold text-[#1a1b22]">{value}</dd>
                 </div>
               ))}
             </dl>
@@ -51,16 +51,16 @@ export default function BotanicalSpecsView({ masterPlant }) {
       </div>
 
       {masterPlant && (
-        <div className="bg-white border border-[#E4E1D3] rounded-md p-6 hover:border-[#3F6B4A] transition-colors duration-150">
-          <p className="text-xs font-bold text-[#6E7568] uppercase tracking-widest font-mono mb-4">Health Threats</p>
+        <div className="bg-white border border-[#c8c5ca] rounded-md p-6 hover:border-[#1b6b51] transition-colors duration-150">
+          <p className="text-xs font-bold text-[#47464a] uppercase tracking-widest mb-4">Health Threats</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
               { label: 'Common Pests',    value: masterPlant.pests    },
               { label: 'Common Diseases', value: masterPlant.diseases  },
             ].map(({ label, value }) => (
-              <div key={label} className="bg-[#F7E9E5] border border-[#A14B36]/25 rounded-sm p-4">
-                <p className="text-[10px] font-bold text-[#A14B36] uppercase tracking-widest font-mono mb-2">{label}</p>
-                <p className="text-sm font-bold text-[#A14B36]">{value || '—'}</p>
+              <div key={label} className="bg-[#fef2f2] border border-[#ef4444]/25 rounded-sm p-4">
+                <p className="text-[10px] font-bold text-[#ef4444] uppercase tracking-widest mb-2">{label}</p>
+                <p className="text-sm font-bold text-[#ef4444]">{value || '—'}</p>
               </div>
             ))}
           </div>

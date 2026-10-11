@@ -1,1 +1,1 @@
-export const CATEGORIES = ['All Plants', 'Herbs', 'Vegetables', 'Succulents', 'Flowering', 'Foliage', 'Fruit Trees', 'Other'];
+export const CATEGORIES = ['All Plants', 'Herbal', 'Vegetables', 'Succulents', 'Flowering', 'Foliage', 'Fruit Trees', 'Ornamental', 'Other'];

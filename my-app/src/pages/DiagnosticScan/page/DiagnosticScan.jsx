@@ -1,4 +1,5 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Auth/Service/AuthContext';
 
 import { Topbar, FullPageLoader, MobileNav, Footer } from '../../../components/index';
@@ -13,13 +14,14 @@ import {
 import { saveScanToGarden } from '../../GardenDashboard/services/GardenService';
 
 import {  ScanSuccessModal } from '../components/index';
-import { MdErrorOutline, MdBiotech,} from 'react-icons/md';
+import { MdErrorOutline, MdBiotech, MdHistory } from 'react-icons/md';
 import {BentoGridTips,NotAPlantCard,PlantIdResultPanel,ScanHistory,ScannerViewport} from '../components/index'
 import { useScanCache } from '../hooks/useScanCache';
 
 
 export default function DiagnosticScan() {
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
   const userId = currentUser?.uid ?? null;
 
@@ -204,7 +206,7 @@ export default function DiagnosticScan() {
   }
 
   return (
-    <div className="bg-[#fbf8ff] text-[#1a1b22] min-h-screen flex flex-col overflow-x-hidden" style={{ fontFamily: 'Manrope, sans-serif' }}>
+    <div className="bg-[#fbf8ff] text-[#1a1b22] min-h-screen flex flex-col overflow-x-hidden">
       <style>{`
         @keyframes pulse-bracket {
           0%, 100% { opacity: 0.3; transform: scale(1); }
@@ -217,7 +219,7 @@ export default function DiagnosticScan() {
 </div>
 
 {/* Mobile topbar — visible only on small screens */}
-<div className="block lg:hidden">
+<div className="block md:hidden">
   <MobileNav />
 </div>
     
@@ -233,12 +235,29 @@ export default function DiagnosticScan() {
       />
       <main className="flex-grow flex flex-col items-center px-4 md:px-6 py-8 max-w-7xl mx-auto w-full gap-6 pb-28 lg:pb-8">
 
-        <section className="text-center space-y-1 max-w-xl">
-          <div className="flex items-center justify-center gap-2 text-[#1b6b51] mb-2">
+        <div className="w-full max-w-3xl flex items-center justify-between gap-4">
+          <span className="inline-flex items-center gap-2 text-[#1b6b51]">
             <MdBiotech className="text-xl" />
             <span className="text-xs font-bold uppercase tracking-widest">AI Identification</span>
-          </div>
-          <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          </span>
+          <button
+            onClick={() => navigate('/history-logs')}
+            className="group inline-flex items-center gap-2 bg-white border border-[#c8c5ca] text-[#1a1b22] pl-2.5 pr-4 py-1.5 rounded-full text-xs font-bold shadow-sm hover:border-[#1b6b51] hover:text-[#1b6b51] hover:bg-[#f4f2fd] active:scale-95 transition-all"
+          >
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#a6f2d1] text-[#1b6b51] group-hover:bg-[#1b6b51] group-hover:text-white transition-colors">
+              <MdHistory className="text-sm" />
+            </span>
+            History
+            {history.length > 0 && (
+              <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-[#1b6b51] text-white text-[10px] font-bold flex items-center justify-center">
+                {history.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        <section className="text-center space-y-1 max-w-xl">
+          <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">
             Diagnostic Scan
           </h1>
           <p className="text-sm text-[#47464a]">
@@ -278,7 +297,7 @@ export default function DiagnosticScan() {
     <button
       onClick={handleScanAnother}
       className="flex items-center gap-2 bg-[#1b6b51] text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-90 active:scale-95 transition-all"
-      style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+     
     >
       <MdBiotech className="text-base" />
       Scan Another Plant
@@ -307,7 +326,7 @@ export default function DiagnosticScan() {
           <NotAPlantCard score={scanResult.isPlantScore} onRetry={handleRetry} />
         )}
 
-        {!scanning && <ScanHistory history={history} />}
+        {!scanning && <ScanHistory history={history} onViewAll={() => navigate('/history-logs')} />}
         {!scanResult && <BentoGridTips />}
       </main>
       <div className="hidden lg:block">

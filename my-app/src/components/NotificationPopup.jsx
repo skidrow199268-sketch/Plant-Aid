@@ -16,7 +16,7 @@ export default function NotificationsPopup({ onClose }) {
             <div className="w-6 h-6 rounded-lg bg-[#a6f2d1] flex items-center justify-center">
               <MdNotificationsNone className="text-[#1b6b51] text-sm" />
             </div>
-            <span className="text-sm font-bold text-black dark:text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <span className="text-sm font-bold text-black dark:text-white">
               Notifications
             </span>
           </div>
@@ -31,7 +31,7 @@ export default function NotificationsPopup({ onClose }) {
           <div className="w-12 h-12 rounded-2xl bg-[#a6f2d1]/30 flex items-center justify-center">
             <MdNotificationsNone className="text-2xl text-[#1b6b51]" />
           </div>
-          <p className="text-sm font-bold text-black dark:text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <p className="text-sm font-bold text-black dark:text-white">
             No notifications yet
           </p>
           <p className="text-xs text-[#47464a] max-w-[220px] leading-relaxed">

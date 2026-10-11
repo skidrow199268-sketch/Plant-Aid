@@ -1,4 +1,5 @@
 export {default as EmptyState} from './EmptyState'
 export {default as GardenBadge} from './GardenBadge'
+export {default as Pagination} from './Pagination'
 export {default as PlantRow} from './PlantRow'
 export {default as Toast} from './Toast'

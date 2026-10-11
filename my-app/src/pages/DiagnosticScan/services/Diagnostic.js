@@ -31,6 +31,7 @@ import {
 
 import { db } from '../../../firebase/firebase';
 import {fileToPlantIdBase64} from '../utils/fileToPlantIdBase64'
+import { identifyPlantWithGeminiFallback } from './geminiIdentifyFallback';
 const PLANT_ID_API_KEY = import.meta.env.VITE_PLANT_ID_API_KEY;
 const PLANT_ID_URL     = 'https://api.plant.id/v3/identification?details=common_names,taxonomy&language=en';
 
@@ -226,8 +227,60 @@ export async function fetchScanHistory(userId, maxItems = 10) {
 // ─────────────────────────────────────────────────────────────
 
 
+function hasUsableIdentification(result) {
+  const top = result?.suggestions?.[0];
+  return (
+    Array.isArray(result?.suggestions) &&
+    result.suggestions.length > 0 &&
+    typeof top?.name === 'string' &&
+    top.name.length > 0 &&
+    top.name !== 'Unknown'
+  );
+}
+
+
 export async function runScanPipeline(userId, imageFileOrFiles, options = {}) {
-  const result = await identifyPlant(imageFileOrFiles, options);
+  const fileArray = Array.isArray(imageFileOrFiles) ? imageFileOrFiles : [imageFileOrFiles];
+
+  if (!fileArray.length || !fileArray[0]) {
+    throw new Error('No file provided');
+  }
+
+  let result = null;
+  let plantIdError = null;
+
+  // Step 1 — Plant.id (primary provider, unchanged)
+  try {
+    result = await identifyPlant(imageFileOrFiles, options);
+  } catch (err) {
+    plantIdError = err;
+    console.error('[Diagnostic] Plant.id identification failed:', err?.message ?? err);
+  }
+
+  // Step 1b — Gemini FREE fallback, only on a genuine Plant.id failure
+  //           (quota/billing/rate-limit/network/HTTP/JSON) or an empty,
+  //           unusable Plant.id identification.
+  if (plantIdError) {
+    console.warn('[Diagnostic] Trying Gemini FREE fallback identification...');
+    try {
+      result = await identifyPlantWithGeminiFallback(fileArray);
+      console.warn('[Diagnostic] Gemini fallback identification used.');
+    } catch (geminiErr) {
+      console.error('[Diagnostic] Gemini fallback failed:', geminiErr?.message ?? geminiErr);
+      throw new Error(
+        `${plantIdError.message} — Gemini fallback also failed: ${geminiErr.message}`,
+        { cause: geminiErr },
+      );
+    }
+  } else if (!hasUsableIdentification(result)) {
+    console.warn('[Diagnostic] Plant.id returned an unusable identification — trying Gemini FREE fallback...');
+    try {
+      result = await identifyPlantWithGeminiFallback(fileArray);
+      console.warn('[Diagnostic] Gemini fallback identification used.');
+    } catch (geminiErr) {
+      console.warn('[Diagnostic] Gemini fallback failed — keeping Plant.id response:', geminiErr?.message ?? geminiErr);
+    }
+  }
 
   // Step 2 — save to Firestore only if it's actually a plant
   let scanId = null;

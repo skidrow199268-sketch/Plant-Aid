@@ -7,13 +7,13 @@ function PlantListModal({ plants, onSelect, onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-      style={{ fontFamily: "'Manrope', sans-serif" }}
+     
     >
       <div className="absolute inset-0" onClick={onClose} />
       <div className="relative w-full max-w-md max-h-[80vh] overflow-hidden bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-700 shadow-2xl z-10 flex flex-col">
 
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100 dark:border-zinc-800">
-          <h3 className="text-base font-extrabold text-zinc-900 dark:text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+          <h3 className="text-base font-extrabold text-zinc-900 dark:text-white">
             My Plants ({plants.length})
           </h3>
           <button

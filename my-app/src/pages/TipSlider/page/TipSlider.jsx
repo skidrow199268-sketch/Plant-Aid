@@ -88,7 +88,7 @@ export default function PlantTipsSlider() {
   }
 
   return (
-    <div className="bg-[#fbf8ff] dark:bg-[#0f0f0f] text-[#1a1b22] dark:text-gray-100 min-h-screen flex flex-col  pb-20 lg:pb-0">
+    <div className="bg-[#fbf8ff] dark:bg-[#0f0f0f] text-[#1a1b22] dark:text-gray-100 min-h-screen flex flex-col overflow-x-hidden pb-28 md:pb-0">
 
       <Topbar />
 
@@ -97,7 +97,7 @@ export default function PlantTipsSlider() {
         <MobileNav />
       </div>
 
-      <main className="flex-grow px-6 py-12 w-full max-w-7xl mx-auto">
+      <main className="flex-grow px-4 md:px-6 py-12 w-full max-w-7xl mx-auto">
 
         {/* ── CAROUSEL SECTION ─────────────────────────────── */}
         <section>

@@ -87,7 +87,7 @@ export function PlantAnalysisCard({ analysis, loading, error }) {
         {/* Title row */}
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <h3 className="text-xl font-extrabold text-black dark:text-white leading-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <h3 className="text-xl font-extrabold text-black dark:text-white leading-tight">
               {analysis.commonName}
             </h3>
             <p className="text-xs italic text-[#47464a] mt-0.5">{analysis.scientificName}</p>

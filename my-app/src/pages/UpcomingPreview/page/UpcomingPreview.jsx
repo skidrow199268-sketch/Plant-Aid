@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Auth/Service/AuthContext';
-import { FullPageLoader, SectionHeader,MobileSectionNav } from '../../../components/index';
+import { FullPageLoader, SectionHeader, MobileSectionNav, Topbar, Footer } from '../../../components/index';
 
 import {
   MdOutlineWaterDrop,
@@ -121,13 +121,17 @@ export default function PlantAidUpcomingPreview() {
 
   return (
     <div
-      className="bg-[#fbf8ff] dark:bg-[#0f0f0f] pb-20 lg:pb-8 text-[#1a1b22] dark:text-gray-100 min-h-screen flex flex-col"
-      style={{ fontFamily: 'Manrope, sans-serif' }}
+      className="bg-[#fbf8ff] dark:bg-[#0f0f0f] pb-28 md:pb-0 text-[#1a1b22] dark:text-gray-100 min-h-screen flex flex-col"
+     
     >
       {/* Topbar — your reusable component */}
      {/* Desktop topbar — hidden on small screens */}
-<div className="hidden lg:block md:block">
+<div className="hidden md:block">
   <SectionHeader />
+</div>
+
+<div className="md:hidden">
+  <Topbar />
 </div>
 
 <div className="block lg:hidden">
@@ -135,7 +139,7 @@ export default function PlantAidUpcomingPreview() {
 </div>
 
       {/* Main — original bento grid layout */}
-      <main className="flex-grow w-full max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {/* ── Left column ──────────────────────────────────── */}
         <div className="lg:col-span-8 flex flex-col gap-6">
@@ -145,38 +149,38 @@ export default function PlantAidUpcomingPreview() {
 
           {/* Stat Cards — live Firestore data */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white p-6 rounded-3xl border border-[#c8c5ca]/40 shadow-[0_8px_30px_rgba(0,0,0,0.02)] h-44 flex flex-col justify-between">
+            <div className="bg-white p-6 rounded-3xl border border-[#c8c5ca]/40 shadow-[0_8px_30px_rgba(0,0,0,0.02)] min-h-44 flex flex-col justify-between">
               <div>
                 <MdOutlineWaterDrop className="text-xl text-[#1b6b51]" />
                 <h3
                   className="font-bold mt-2 text-[17px]"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                 
                 >
                   Upcoming Tasks
                 </h3>
               </div>
               <div
                 className="text-3xl font-bold text-black dark:text-white"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+               
               >
                 {upcoming.length}
                 <span className="text-sm font-medium text-[#47464a] ml-1">reminders</span>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-3xl border border-[#c8c5ca]/40 shadow-[0_8px_30px_rgba(0,0,0,0.02)] h-44 flex flex-col justify-between">
+            <div className="bg-white p-6 rounded-3xl border border-[#c8c5ca]/40 shadow-[0_8px_30px_rgba(0,0,0,0.02)] min-h-44 flex flex-col justify-between">
               <div>
                 <MdThermostat className="text-xl text-[#1b6b51]" />
                 <h3
                   className="font-bold mt-2 text-[17px]"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                 
                 >
                   Overdue
                 </h3>
               </div>
               <div
                 className={`text-3xl font-bold ${overdue.length > 0 ? 'text-amber-500' : 'text-black dark:text-white'}`}
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+               
               >
                 {overdue.length}
                 <span className="text-sm font-medium text-[#47464a] ml-1">
@@ -188,7 +192,7 @@ export default function PlantAidUpcomingPreview() {
         </div>
 
         {/* ── Right column — live timeline panel ─────────── */}
-        <aside className="lg:col-span-4 h-full" style={{ minHeight: '520px' }}>
+        <aside className="lg:col-span-4 h-full lg:min-h-[520px]">
           <UpcomingPanel
             items={[...overdue, ...upcoming]}
             overdueCount={overdue.length}
@@ -202,20 +206,9 @@ export default function PlantAidUpcomingPreview() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#fbf8ff] dark:bg-[#0f0f0f] border-t border-[#c8c5ca] dark:border-zinc-700 py-5 px-6 flex flex-col items-center gap-2 mt-auto">
-        <div
-          className="text-lg font-bold text-black dark:text-white"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-        >
-          PlantAid
-        </div>
-        <div className="flex gap-5">
-          <a className="text-sm text-[#47464a] dark:text-gray-400 hover:text-[#1b6b51] transition-colors" href="#signup">Sign up</a>
-          <a className="text-sm text-[#47464a] dark:text-gray-400 hover:text-[#1b6b51] transition-colors" href="#privacy">Privacy Policy</a>
-          <a className="text-sm text-[#47464a] dark:text-gray-400 hover:text-[#1b6b51] transition-colors" href="#help">Help Center</a>
-        </div>
-        <p className="text-sm text-[#1b6b51]">© {new Date().getFullYear()} PlantAid. Botanical Precision.</p>
-      </footer>
+      <div className="hidden lg:block">
+        <Footer />
+      </div>
 
       <Toast message={toast.message} visible={toast.visible} />
     </div>

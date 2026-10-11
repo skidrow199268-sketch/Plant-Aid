@@ -36,14 +36,14 @@ export default function StatCards({ stats, pendingCount, navigate }) {
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-2 sm:gap-3">
       {cards.map((c) => {
         const Icon = c.icon;
         return (
           <button
             key={c.label}
             onClick={() => navigate(c.path)}
-            className="bg-white dark:bg-zinc-900 rounded-2xl border border-[#c8c5ca]/40 dark:border-zinc-700/50 p-4 text-left hover:border-[#1b6b51]/40 hover:shadow-sm transition-all group"
+            className="bg-white dark:bg-zinc-900 rounded-2xl border border-[#c8c5ca]/40 dark:border-zinc-700/50 p-3 sm:p-4 text-left hover:border-[#1b6b51]/40 hover:shadow-sm transition-all group"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${c.iconBg} ${c.iconColor}`}>

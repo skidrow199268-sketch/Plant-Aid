@@ -18,9 +18,9 @@ export default function GrowthTimeline({ currentStageIdx, onSelect, activeTrackP
         Growth Timeline
       </h3>
       <div className="relative space-y-10">
-        <div className="absolute left-[17px] top-4 bottom-4 w-[2px] bg-zinc-100 -z-10" />
+        <div className="absolute left-[17px] top-4 bottom-4 w-[2px] bg-zinc-100" />
         <div
-          className="absolute left-[17px] top-4 w-[2px] bg-[#064e3b] transition-all duration-500 origin-top -z-10"
+          className="absolute left-[17px] top-4 w-[2px] bg-[#064e3b] transition-all duration-500 origin-top"
           style={{ height: activeTrackPct }}
         />
         {GROWTH_STAGES.map((stage, idx) => (

@@ -26,10 +26,10 @@ import {
 
 import {TABS} from '../constant/detail'
 
-// ── Design tokens (kept inline; consider lifting to tailwind.config) ──
-// paper #F5F6F0 · card #FFFFFF · border #E4E1D3
-// ink #212B22 · ink-muted #6E7568
-// fern #3F6B4A · gold #A9812F · rust #A14B36
+// ── Design tokens (shared app theme) ──
+// surface #fbf8ff · card #FFFFFF · border #c8c5ca
+// ink #1a1b22 · muted #47464a
+// brand #1b6b51 · brand-hover #237157 · danger #ef4444
 
 // ── Main ─────────────────────────────────────────────────────
 export default function PlantDetails() {
@@ -104,18 +104,18 @@ export default function PlantDetails() {
   // ── Not in garden state ──────────────────────────────────
   if (!data?.userPlant) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F5F6F0] px-6">
+      <div className="min-h-screen flex items-center justify-center bg-[#fbf8ff] px-6">
         <div className="text-center max-w-sm">
-          <div className="w-20 h-20 rounded-md bg-[#FBF3DF] border-2 border-dashed border-[#3F6B4A]/40 flex items-center justify-center mx-auto mb-6">
-            <IoLeaf className="text-4xl text-[#3F6B4A]" />
+          <div className="w-20 h-20 rounded-md bg-[#e8f8f1] border-2 border-dashed border-[#1b6b51]/40 flex items-center justify-center mx-auto mb-6">
+            <IoLeaf className="text-4xl text-[#1b6b51]" />
           </div>
-          <h2 className="text-2xl font-serif font-semibold text-[#212B22] tracking-tight">Not in your garden</h2>
-          <p className="text-[#6E7568] text-sm mt-2 leading-relaxed">
+          <h2 className="text-2xl font-semibold text-[#1a1b22] tracking-tight">Not in your garden</h2>
+          <p className="text-[#47464a] text-sm mt-2 leading-relaxed">
             Add this plant from the directory first to start tracking it here.
           </p>
           <button
             onClick={() => navigate(-1)}
-            className="mt-6 bg-[#212B22] text-[#F5F6F0] px-6 py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest hover:bg-[#3F6B4A] transition-colors"
+            className="mt-6 bg-[#1a1b22] text-[#fbf8ff] px-6 py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest hover:bg-[#1b6b51] transition-colors"
           >
             Back to Directory
           </button>
@@ -135,37 +135,37 @@ export default function PlantDetails() {
 const hasValidImg = displayImg && !imgError;
 
   return (
-    <div className="bg-[#F5F6F0] min-h-screen font-sans text-[#212B22] flex flex-col antialiased selection:bg-[#3F6B4A]/20 selection:text-[#212B22]">
+    <div className="bg-[#fbf8ff] min-h-screen font-sans text-[#1a1b22] flex flex-col antialiased selection:bg-[#1b6b51]/20 selection:text-[#1a1b22]">
 
       {/* ── Top Nav ── */}
-      <header className="w-full h-16 bg-white border-b border-[#E4E1D3] sticky top-0 z-40 flex items-center px-4 md:px-6">
+      <header className="w-full h-16 bg-white border-b border-[#c8c5ca] sticky top-0 z-40 flex items-center px-4 md:px-6">
         <div className="flex items-center justify-between w-full max-w-5xl mx-auto">
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="w-9 h-9 rounded-sm hover:bg-[#F5F6F0] flex items-center justify-center transition-colors"
+              className="w-9 h-9 rounded-sm hover:bg-[#fbf8ff] flex items-center justify-center transition-colors"
             >
-              <MdArrowBack className="text-[#212B22] text-xl" />
+              <MdArrowBack className="text-[#1a1b22] text-xl" />
             </button>
-            <div className="h-5 w-px bg-[#E4E1D3]" />
+            <div className="h-5 w-px bg-[#c8c5ca]" />
             <div className="flex items-center gap-2">
-              <IoLeaf className="text-[#3F6B4A] text-xl" />
-              <span className="text-xl font-serif font-semibold text-[#212B22] tracking-tight">PlantAid</span>
+              <IoLeaf className="text-[#1b6b51] text-xl" />
+              <span className="text-xl font-semibold text-[#1a1b22] tracking-tight">PlantAid</span>
             </div>
           </div>
 
           {/* Actions in nav on desktop */}
           <div className="hidden md:flex items-center gap-2">
-            <label className="cursor-pointer flex items-center gap-2 border border-[#E4E1D3] bg-white text-[#212B22] px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-widest hover:border-[#3F6B4A] hover:text-[#3F6B4A] transition-colors">
+            <label className="cursor-pointer flex items-center gap-2 border border-[#c8c5ca] bg-white text-[#1a1b22] px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-widest hover:border-[#1b6b51] hover:text-[#1b6b51] transition-colors">
               {uploading
-                ? <span className="w-3.5 h-3.5 border-2 border-[#E4E1D3] border-t-[#3F6B4A] rounded-full animate-spin" />
+                ? <span className="w-3.5 h-3.5 border-2 border-[#c8c5ca] border-t-[#1b6b51] rounded-full animate-spin" />
                 : <MdEdit className="text-sm" />}
               {uploading ? 'Uploading…' : 'Update Photo'}
               <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
             </label>
             <button
               onClick={() => setActiveTab('journal')}
-              className="flex items-center gap-2 bg-[#212B22] text-[#F5F6F0] px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-widest hover:bg-[#3F6B4A] transition-colors"
+              className="flex items-center gap-2 bg-[#1a1b22] text-[#fbf8ff] px-4 py-2 rounded-sm text-xs font-bold uppercase tracking-widest hover:bg-[#1b6b51] transition-colors"
             >
               <GiNotebook className="text-sm" />
               Log Growth
@@ -178,18 +178,18 @@ const hasValidImg = displayImg && !imgError;
 
         {/* Error banner */}
         {error && (
-          <div className="mb-6 bg-[#F7E9E5] border border-[#A14B36]/30 text-[#A14B36] text-sm rounded-sm px-4 py-3 flex items-center gap-2">
+          <div className="mb-6 bg-[#fef2f2] border border-[#ef4444]/30 text-[#ef4444] text-sm rounded-sm px-4 py-3 flex items-center gap-2">
             <MdErrorOutline className="flex-shrink-0 text-lg" /> {error}
           </div>
         )}
 
         {/* ── Hero: specimen label card ── */}
-        <header className="mb-10 relative bg-white border border-[#E4E1D3] rounded-md p-6">
+        <header className="mb-10 relative bg-white border border-[#c8c5ca] rounded-md p-6">
           {/* corner ticks */}
-          <span className="absolute top-2 left-2 w-3 h-3 border-t border-l border-[#3F6B4A]/50" />
-          <span className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-[#3F6B4A]/50" />
+          <span className="absolute top-2 left-2 w-3 h-3 border-t border-l border-[#1b6b51]/50" />
+          <span className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-[#1b6b51]/50" />
 
-          <div className="flex items-start gap-5">
+          <div className="flex items-start gap-4 sm:gap-5">
             {/* Plant image / placeholder */}
             <div className="flex-shrink-0">
               {hasValidImg ? (
@@ -197,7 +197,7 @@ const hasValidImg = displayImg && !imgError;
   src={displayImg}
   alt={displayName}
   onError={() => setImgError(true)}
-  className="w-20 h-20 md:w-24 md:h-24 rounded-md object-cover border border-[#E4E1D3]"
+  className="w-20 h-20 md:w-24 md:h-24 rounded-md object-cover border border-[#c8c5ca]"
 />
               ) : (
                 <PlantPlaceholder size="lg" />
@@ -207,15 +207,15 @@ const hasValidImg = displayImg && !imgError;
             {/* Title block */}
             <div className="flex-grow min-w-0">
               <div className="flex flex-wrap items-center gap-3 mb-1">
-                <h1 className="text-3xl md:text-4xl font-serif font-semibold text-[#212B22] tracking-tight truncate">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#1a1b22] tracking-tight break-words">
                   {displayName}
                 </h1>
                 <StagePill stage={userPlant.currentStage} />
               </div>
               {scientificName && (
-                <p className="text-xs text-[#6E7568] font-mono uppercase tracking-widest">{scientificName}</p>
+                <p className="text-xs text-[#47464a] uppercase tracking-widest">{scientificName}</p>
               )}
-              <p className="text-xs text-[#6E7568] font-mono mt-1.5">
+              <p className="text-xs text-[#47464a] mt-1.5">
                 {String(days).padStart(3, '0')} {days === 1 ? 'DAY' : 'DAYS'} SINCE PLANTING
               </p>
             </div>
@@ -223,16 +223,16 @@ const hasValidImg = displayImg && !imgError;
 
           {/* Mobile actions below header */}
           <div className="flex items-center gap-2 mt-5 md:hidden">
-            <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 border border-[#E4E1D3] bg-white text-[#212B22] py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest hover:border-[#3F6B4A] hover:text-[#3F6B4A] transition-colors">
+            <label className="flex-1 cursor-pointer flex items-center justify-center gap-2 border border-[#c8c5ca] bg-white text-[#1a1b22] py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest hover:border-[#1b6b51] hover:text-[#1b6b51] transition-colors">
               {uploading
-                ? <span className="w-3.5 h-3.5 border-2 border-[#E4E1D3] border-t-[#3F6B4A] rounded-full animate-spin" />
+                ? <span className="w-3.5 h-3.5 border-2 border-[#c8c5ca] border-t-[#1b6b51] rounded-full animate-spin" />
                 : <MdEdit className="text-sm" />}
               {uploading ? 'Uploading…' : 'Update Photo'}
               <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
             </label>
             <button
               onClick={() => setActiveTab('journal')}
-              className="flex-1 flex items-center justify-center gap-2 bg-[#212B22] text-[#F5F6F0] py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest hover:bg-[#3F6B4A] transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 bg-[#1a1b22] text-[#fbf8ff] py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest hover:bg-[#1b6b51] transition-colors"
             >
               <GiNotebook className="text-sm" />
               Log Growth
@@ -241,15 +241,15 @@ const hasValidImg = displayImg && !imgError;
         </header>
 
         {/* ── Tab bar — index-tab style ── */}
-        <div className="flex items-center gap-6 border-b border-[#E4E1D3] mb-8 overflow-x-auto [scrollbar-width:none]">
+        <div className="flex items-center gap-4 sm:gap-6 border-b border-[#c8c5ca] mb-8 overflow-x-auto [scrollbar-width:none]">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`min-w-max pb-3 border-b-2 text-xs font-bold uppercase tracking-widest transition-colors ${
+              className={`min-w-max pb-3 border-b-2 text-xs font-bold uppercase tracking-wide transition-colors ${
                 activeTab === tab.id
-                  ? 'border-[#3F6B4A] text-[#212B22]'
-                  : 'border-transparent text-[#6E7568] hover:text-[#212B22]'
+                  ? 'border-[#1b6b51] text-[#1a1b22]'
+                  : 'border-transparent text-[#47464a] hover:text-[#1a1b22]'
               }`}
             >
               {tab.label}
@@ -258,7 +258,7 @@ const hasValidImg = displayImg && !imgError;
         </div>
 
         {/* ── Tab content ── */}
-        <div className="min-h-[500px]">
+        <div className="min-h-[320px] md:min-h-[500px]">
           {activeTab === 'progress' && (
             <ProgressView masterPlant={masterPlant} userPlant={userPlant} journals={journals} />
           )}
@@ -275,17 +275,17 @@ const hasValidImg = displayImg && !imgError;
       </main>
 
       {/* ── Footer ── */}
-      <footer className="bg-white border-t border-[#E4E1D3] flex flex-col items-center gap-2 w-full px-6 py-6 mt-12">
+      <footer className="bg-white border-t border-[#c8c5ca] flex flex-col items-center gap-2 w-full px-6 py-6 mt-12">
         <div className="flex items-center gap-1.5 mb-1">
-          <IoLeaf className="text-[#3F6B4A] text-lg" />
-          <span className="text-sm font-serif font-semibold text-[#212B22]">PlantAid</span>
+          <IoLeaf className="text-[#1b6b51] text-lg" />
+          <span className="text-sm font-semibold text-[#1a1b22]">PlantAid</span>
         </div>
         <div className="flex gap-6">
-          <a className="text-[#6E7568] hover:text-[#3F6B4A] transition-colors text-xs" href="#">Sign up</a>
-          <a className="text-[#6E7568] hover:text-[#3F6B4A] transition-colors text-xs" href="#">Privacy Policy</a>
-          <a className="text-[#6E7568] hover:text-[#3F6B4A] transition-colors text-xs" href="#">Help Center</a>
+          <a className="text-[#47464a] hover:text-[#1b6b51] transition-colors text-xs" href="#">Sign up</a>
+          <a className="text-[#47464a] hover:text-[#1b6b51] transition-colors text-xs" href="#">Privacy Policy</a>
+          <a className="text-[#47464a] hover:text-[#1b6b51] transition-colors text-xs" href="#">Help Center</a>
         </div>
-        <p className="text-[11px] text-[#6E7568]/60 font-mono mt-1">
+        <p className="text-[11px] text-[#47464a]/60 mt-1">
           © {new Date().getFullYear()} PLANTAID · BOTANICAL PRECISION
         </p>
       </footer>

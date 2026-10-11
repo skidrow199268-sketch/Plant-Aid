@@ -73,7 +73,7 @@ export default function Login() {
   };
 
   return (
-    <div className="bg-zinc-50 text-zinc-800 min-h-screen flex items-center justify-center p-4 relative overflow-hidden antialiased selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="bg-[#fbf8ff] text-zinc-800 min-h-screen flex items-center justify-center p-4 relative overflow-hidden antialiased selection:bg-emerald-100 selection:text-emerald-900">
 
       {/* Atmospheric Background */}
       <div className="absolute inset-0 bg-[radial-gradient(#0f766e_0.5px,transparent_0.5px)] [background-size:24px_24px] opacity-10 pointer-events-none" />

@@ -29,7 +29,7 @@ export default function QuickResult({ preview, topMatch, confidence, healthCfg, 
           <p className="text-xs text-[#47464a] font-medium uppercase tracking-widest mb-0.5">Top Match</p>
           <h3
             className="text-base font-extrabold text-black dark:text-white leading-tight truncate"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+           
           >
             {topMatch?.commonNames?.[0] || topMatch?.name || 'Unknown Plant'}
           </h3>
@@ -94,7 +94,7 @@ export default function QuickResult({ preview, topMatch, confidence, healthCfg, 
         <button
           onClick={onViewDetails}
           className="flex-1 h-11 bg-[#1b6b51] text-white rounded-xl text-xs lg:text-sm font-bold flex items-center justify-center gap-1.5 hover:opacity-90 transition-all active:scale-95"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+         
         >
           View Full Details
           <MdArrowForward className="text-base" />

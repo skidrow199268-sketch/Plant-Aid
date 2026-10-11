@@ -29,7 +29,7 @@ function SuccessModal({ onRedirect }) {
         {/* Text */}
         <h2
           className="text-2xl font-bold text-black dark:text-white tracking-tight mb-2"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+         
         >
           Account Created!
         </h2>
@@ -52,7 +52,7 @@ function SuccessModal({ onRedirect }) {
         <button
           onClick={onRedirect}
           className="flex items-center gap-2 px-5 py-2.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+         
         >
           Go to Login <MdArrowForward />
         </button>
@@ -178,7 +178,7 @@ export default function Register() {
   const displayError = localError || authError;
 
   return (
-    <div className="min-h-screen text-[#1a1b22] bg-[#f8fafc] flex flex-col relative overflow-x-hidden selection:bg-[#1b6b51]/10">
+    <div className="min-h-screen text-[#1a1b22] bg-[#fbf8ff] flex flex-col relative overflow-x-hidden selection:bg-[#1b6b51]/10">
       {/* Background */}
       <div className="absolute inset-0 pointer-events-none -z-20 bg-[radial-gradient(circle_at_top_right,rgba(27,107,81,0.05),transparent_400px)] md:bg-[radial-gradient(circle_at_top_right,rgba(27,107,81,0.05),transparent_600px)]" />
       <div className="absolute inset-0 pointer-events-none -z-20 bg-[radial-gradient(circle_at_bottom_left,rgba(0,0,0,0.03),transparent_400px)]" />

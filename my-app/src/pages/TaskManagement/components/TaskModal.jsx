@@ -83,7 +83,7 @@ export default function TaskModal({ userPlants, onClose, onSave, saving }) {
             <div className="w-8 h-8 rounded-xl bg-[#a6f2d1] flex items-center justify-center">
               <MdCalendarMonth className="text-[#1b6b51] text-base" />
             </div>
-            <h2 className="text-xl font-bold text-black dark:text-white tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <h2 className="text-xl font-bold text-black dark:text-white tracking-tight">
               Schedule Care Task
             </h2>
           </div>
@@ -247,7 +247,7 @@ export default function TaskModal({ userPlants, onClose, onSave, saving }) {
             onClick={handleSave}
             disabled={saving}
             className="flex-1 h-12 bg-[#1b6b51] text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98] hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+           
           >
             {saving
               ? <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -6,6 +6,7 @@ import {
   getUserLocation,
   getBotanicalInsight,
 } from '../services/DashboardServices.js';
+import { getSeason } from '../utils/season';
 
 import {
   MdSunny,
@@ -45,6 +46,8 @@ export default function WeatherInsight() {
     return <WiCloud className="text-[80px] text-zinc-400" />;
   };
 
+  const season = getSeason(weather);
+
   return (
     <section className="col-span-12 bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-700 p-6 flex flex-col md:flex-row items-start md:items-center gap-8 relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-zinc-100 dark:hover:shadow-zinc-900/30">
       <div className="absolute top-0 right-0 p-6 opacity-[0.04] pointer-events-none select-none">
@@ -56,6 +59,11 @@ export default function WeatherInsight() {
           <div className="flex items-center gap-2 text-emerald-700">
             <WiDaySunny className="text-2xl" />
             <span className="text-xs font-bold uppercase tracking-widest">Climate Forecast</span>
+            {season && (
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">
+                {season.label}
+              </span>
+            )}
           </div>
           <button onClick={load} className="p-1.5 rounded-full hover:bg-zinc-100 transition-colors" title="Refresh weather">
             <MdRefresh className={`text-zinc-400 text-lg ${loading ? 'animate-spin' : ''}`} />

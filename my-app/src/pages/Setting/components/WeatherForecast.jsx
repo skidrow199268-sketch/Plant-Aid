@@ -2,10 +2,12 @@ import { MdCloud, MdWbSunny, MdWbCloudy } from 'react-icons/md';
 import {WeatherDayCard} from './index'
 import { IoRainy, IoPartlySunny } from 'react-icons/io5';
 import {weatherIcon} from '../utils/weather'
+import { getSeason } from '../../DashboardToday/utils/season'
 export default function WeatherForecast({ weather, weatherLoading }) {
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
   const todayIdx = days.findIndex((d) => d.toUpperCase() === today.toUpperCase());
+  const season = getSeason(weather);
 
   const staticUpcoming = [
     { icon: MdCloud,       temp: '29', humidity: '25%' },
@@ -33,7 +35,14 @@ export default function WeatherForecast({ weather, weatherLoading }) {
     <div className="bg-white dark:bg-zinc-900 border border-[#c8c5ca]/50 dark:border-zinc-700/50 rounded-3xl p-4 sm:p-6 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] dark:shadow-zinc-900/20">
       <div className="flex justify-between items-start mb-4 sm:mb-6 gap-3">
         <div className="min-w-0">
-          <h2 className="text-base sm:text-xl font-bold text-black dark:text-white">Meteorological Forecast</h2>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-base sm:text-xl font-bold text-black dark:text-white">Meteorological Forecast</h2>
+            {season && (
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#a6f2d1]/40 text-[#1b6b51]">
+                {season.label}
+              </span>
+            )}
+          </div>
           <p className="text-[#47464a] text-xs sm:text-sm mt-0.5 truncate">
             {weatherLoading
               ? 'Fetching location data…'

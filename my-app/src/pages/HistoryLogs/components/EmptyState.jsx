@@ -25,7 +25,7 @@ export default function EmptyState({ filtered, onGoScan }) {
       {!filtered && (
         <button
           onClick={onGoScan}
-          className="mt-2 flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-95 transition-all"
+          className="mt-2 flex items-center gap-2 bg-[#1b6b51] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#237157] active:scale-95 transition-all shadow-sm"
         >
           <MdBiotech className="text-base" /> Go to Scanner
         </button>

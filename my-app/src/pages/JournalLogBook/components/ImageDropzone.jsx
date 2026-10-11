@@ -32,14 +32,14 @@ export default function ImageDropzone({ preview, onFile, onClear }) {
         <button
           type="button"
           onClick={onClear}
-          className="absolute top-3 right-3 p-2 bg-black/60 rounded-xl text-white hover:bg-black/80 transition-colors opacity-0 group-hover:opacity-100"
+          className="absolute top-3 right-3 p-2 bg-black/60 rounded-xl text-white hover:bg-black/80 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
         >
           <MdClose className="text-base" />
         </button>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="absolute bottom-3 right-3 px-4 py-2 bg-black/60 rounded-xl text-white text-xs font-semibold hover:bg-black/80 transition-colors opacity-0 group-hover:opacity-100 flex items-center gap-1.5"
+          className="absolute bottom-3 right-3 px-4 py-2 bg-black/60 rounded-xl text-white text-xs font-semibold hover:bg-black/80 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 flex items-center gap-1.5"
         >
           <MdAddPhotoAlternate className="text-sm" />
           Change photo

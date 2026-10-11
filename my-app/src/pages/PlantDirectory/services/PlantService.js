@@ -234,22 +234,26 @@ export function careLevel(wateringFrequency = 7) {
 }
 /**
  * Infer a UI category from available plant fields.
+ * Prefers an explicit `category` field (present on newly seeded
+ * plants); older docs without one fall back to regex guessing.
  * Falls back to 'Other' when nothing matches.
  *
  * @param {PlantDoc} plant
  * @returns {string}
  */
 export function inferCategory(plant) {
+  if (plant.category) return plant.category;
+
   const name = (plant.name ?? '').toLowerCase();
   const desc = (plant.description ?? '').toLowerCase();
 
-  if (/basil|mint|rosemary|thyme|oregano|cilantro|parsley/.test(name)) return 'Herbs';
+  if (/basil|mint|rosemary|thyme|oregano|cilantro|parsley/.test(name)) return 'Herbal';
   if (/tomato|pepper|eggplant|squash|cucumber|carrot|lettuce|spinach|cabbage/.test(name)) return 'Vegetables';
   if (/aloe|cactus|succulent|echeveria|haworthia|sedum/.test(name)) return 'Succulents';
   if (/rose|lavender|sunflower|orchid|jasmine|lily|chrysanthemum|tulip/.test(name)) return 'Flowering';
   if (/monstera|pothos|fern|palm|philodendron|snake|dracaena|calathea|rubber/.test(name)) return 'Foliage';
   if (/mango|banana|citrus|lemon|orange|guava|papaya|avocado/.test(name)) return 'Fruit Trees';
-  if (desc.includes('herb')) return 'Herbs';
+  if (desc.includes('herb')) return 'Herbal';
   if (desc.includes('vegetable')) return 'Vegetables';
   if (desc.includes('flower') || desc.includes('bloom')) return 'Flowering';
   return 'Other';

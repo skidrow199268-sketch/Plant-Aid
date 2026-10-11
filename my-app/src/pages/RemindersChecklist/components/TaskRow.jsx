@@ -58,11 +58,11 @@ export default function TaskRow({ task, isLast, onToggle, onDelete }) {
 
       <span className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-md border flex-shrink-0 ${TYPE_STYLES[type]?.bg} ${TYPE_STYLES[type]?.border} ${TYPE_STYLES[type]?.color}`}>
         <span className="text-xs">{TYPE_ICONS[type]}</span>
-        <span className="hidden xs:inline">{REMINDER_TYPE_LABELS[type]}</span>
+        <span className="hidden sm:inline">{REMINDER_TYPE_LABELS[type]}</span>
       </span>
 
       <div className="w-7 h-7 flex items-center justify-center flex-shrink-0">
-        <button onClick={handleDelete} disabled={deleting} className="opacity-0 group-hover:opacity-100 w-7 h-7 rounded-lg bg-neutral-50 text-neutral-400 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all active:scale-95 disabled:opacity-40" title="Delete">
+        <button onClick={handleDelete} disabled={deleting} className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 w-7 h-7 rounded-lg bg-neutral-50 text-neutral-400 flex items-center justify-center hover:bg-red-50 hover:text-red-500 transition-all active:scale-95 disabled:opacity-40" title="Delete">
           {deleting ? <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <MdDelete className="text-base" />}
         </button>
       </div>

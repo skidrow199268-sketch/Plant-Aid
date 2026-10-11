@@ -94,12 +94,12 @@ export default function GardenDashboard() {
   const displayedPlant = selectedPlant || featuredPlant; // NEW
 
   return (
-    <div className="bg-zinc-50/60 min-h-screen text-[#1a1b22] antialiased overflow-x-hidden">
+    <div className="bg-[#fbf8ff] min-h-screen text-[#1a1b22] antialiased overflow-x-hidden flex flex-col">
 
       <Topbar />
       <MobileNav />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 pb-24 md:pb-10 space-y-5 ">
+      <main className="flex-grow max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10 space-y-5 w-full">
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl px-4 py-2.5 flex items-center gap-2">
@@ -156,9 +156,7 @@ export default function GardenDashboard() {
         </div>
       </main>
 
-      {/* Footer */}
-     {/* Footer */}
-<div className="pb-16 md:pb-0">
+      <div className="pb-28 md:pb-0">
   <Footer />
 </div>
 

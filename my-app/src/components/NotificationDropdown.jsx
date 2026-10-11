@@ -81,7 +81,7 @@ export default function NotificationsDropdown() {
               <div className="flex items-center gap-2">
                 <span
                   className="text-[14px] font-bold text-neutral-900"
-                  style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                 
                 >
                   Notifications
                 </span>

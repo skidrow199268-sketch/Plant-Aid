@@ -18,6 +18,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
+import { getSeasonalTip } from '../utils/season';
 
 // ─────────────────────────────────────────────────────────────
 // 1. WEATHER  (OpenWeatherMap – or any API with VITE_WEATHER_API)
@@ -44,6 +45,9 @@ export async function fetchWeather(lat, lon) {
     description: data.weather?.[0]?.description ?? '',
     icon:        data.weather?.[0]?.icon ?? '01d',
     cityName:    data.name ?? '',
+    country:     data.sys?.country ?? '',
+    lat,
+    lon,
     wind:        Math.round(data.wind?.speed ?? 0),
     isRainy,
     isSunny,
@@ -70,22 +74,25 @@ export function getUserLocation() {
 export function getBotanicalInsight(weather) {
   if (!weather) return 'Check on your plants today and make sure they have enough light and water.';
 
+  const seasonalTip = getSeasonalTip(weather);
+  const withSeason = (text) => (seasonalTip ? `${text} ${seasonalTip}` : text);
+
   if (weather.isRainy)
-    return 'Rain is on the way! Skip manual watering today – your outdoor plants are covered. Watch for waterlogged soil and ensure drainage is clear.';
+    return withSeason('Rain is on the way! Skip manual watering today – your outdoor plants are covered. Watch for waterlogged soil and ensure drainage is clear.');
 
   if (weather.isHumid && weather.isSunny)
-    return `High humidity (${weather.humidity}%) with sunshine is perfect for tropical misting. Give your Monstera and Calathea collection some love this afternoon.`;
+    return withSeason(`High humidity (${weather.humidity}%) with sunshine is perfect for tropical misting. Give your Monstera and Calathea collection some love this afternoon.`);
 
   if (weather.temp >= 32)
-    return `It's ${weather.temp}°C outside – heat stress alert! Move sensitive plants out of direct afternoon sun and increase watering frequency today.`;
+    return withSeason(`It's ${weather.temp}°C outside – heat stress alert! Move sensitive plants out of direct afternoon sun and increase watering frequency today.`);
 
   if (weather.temp <= 18)
-    return `Cool temperatures today (${weather.temp}°C). Keep tropical plants away from draughty windows and hold off on fertilising until it warms up.`;
+    return withSeason(`Cool temperatures today (${weather.temp}°C). Protect sensitive plants from cold drafts and hold off on fertilising until it warms up.`);
 
   if (weather.isHumid)
-    return `Humidity is at ${weather.humidity}% – great conditions for propagation. Consider misting leafy plants and checking for fungal issues on dense foliage.`;
+    return withSeason(`Humidity is at ${weather.humidity}% – great conditions for propagation. Consider misting leafy plants and checking for fungal issues on dense foliage.`);
 
-  return `${weather.temp}°C with ${weather.description} – a great day for outdoor plant care. Ideal conditions for repotting or transplanting seedlings.`;
+  return withSeason(`${weather.temp}°C with ${weather.description} – a great day for outdoor plant care. Ideal conditions for repotting or transplanting seedlings.`);
 }
 
 

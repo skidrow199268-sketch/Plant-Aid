@@ -50,7 +50,7 @@ export default function MobileSectionNav() {
                 key={item.key}
                 onClick={() => handleLinkClick(item.path)}
                 className="flex-1 flex flex-col items-center justify-center gap-1 relative active:scale-90 transition-transform duration-150 no-underline"
-                style={{ WebkitTapHighlightColor: 'transparent', fontFamily: "'Manrope', sans-serif" }}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
               >
                 <span
                   className={`absolute top-1 w-1 h-1 rounded-full bg-[#1b6b51] transition-opacity duration-200 ${
@@ -85,7 +85,7 @@ export default function MobileSectionNav() {
           <button
             onClick={() => setShowModal(true)}
             className="flex-1 flex flex-col items-center justify-center gap-1 relative active:scale-90 transition-transform duration-150"
-            style={{ WebkitTapHighlightColor: 'transparent', fontFamily: "'Manrope', sans-serif" }}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             <span className="flex items-center justify-center w-10 h-6 rounded-full transition-colors duration-200 hover:bg-[#a6f2d1]/40">
               <MdAddCircleOutline className="text-[19px] text-[#1b6b51]" />

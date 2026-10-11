@@ -205,9 +205,9 @@ const handleSave = useCallback(async ({ title, content, imageFile, userPlantId, 
         }
       `}</style>
 
-      <div className="bg-[#fbf8ff] pb-15 lg:p-0 text-[#1a1b22] min-h-screen flex flex-col antialiased selection:bg-[#a6f2d1] selection:text-[#1b6b51]">
+      <div className="bg-[#fbf8ff] pb-28 md:pb-0 text-[#1a1b22] min-h-screen flex flex-col antialiased selection:bg-[#a6f2d1] selection:text-[#1b6b51]">
         <Topbar />
-        <div className="block lg:hidden">
+        <div className="block md:hidden">
   <MobileNav />
 </div>
 
@@ -254,6 +254,7 @@ const handleSave = useCallback(async ({ title, content, imageFile, userPlantId, 
               {/* New entry button */}
               <button
                 onClick={() => setEntryModal({ open: true, mode: 'new', entry: null })}
+                aria-label="New journal entry"
                 className="bg-black text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:scale-[0.98] active:scale-95 transition-transform flex items-center gap-2 shadow-sm"
               >
                 <MdAdd className="text-lg" />

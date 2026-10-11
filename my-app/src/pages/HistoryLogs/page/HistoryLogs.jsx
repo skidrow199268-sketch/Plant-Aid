@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Auth/Service/AuthContext';
-import { Topbar, FullPageLoader, Footer } from '../../../components/index';
+import { Topbar, FullPageLoader, Footer, MobileNav } from '../../../components/index';
 
 import {
   loadHistoryScreenData,
@@ -38,7 +38,7 @@ function ScanDetailModal({ record, isOpen, onClose }) {
   const statusStyles = {
     solved:  { bg: 'bg-emerald-50',  text: 'text-emerald-700', icon: <MdCheckCircle className="text-base" /> },
     danger:  { bg: 'bg-red-50',      text: 'text-red-700',     icon: <MdWarning className="text-base" /> },
-    neutral: { bg: 'bg-neutral-100', text: 'text-neutral-600', icon: <MdHelpOutline className="text-base" /> },
+    neutral: { bg: 'bg-[#eeedf7]',    text: 'text-[#47464a]',   icon: <MdHelpOutline className="text-base" /> },
   };
   const style = statusStyles[statusType] ?? statusStyles.neutral;
 
@@ -53,7 +53,7 @@ function ScanDetailModal({ record, isOpen, onClose }) {
       >
         {/* Image */}
         {record.imageUrl && (
-          <div className="w-full h-56 bg-neutral-100 rounded-t-3xl overflow-hidden">
+          <div className="w-full h-56 bg-[#eeedf7] rounded-t-3xl overflow-hidden">
             <img
               src={record.imageUrl}
               alt={record.commonName || 'Scanned plant'}
@@ -67,7 +67,7 @@ function ScanDetailModal({ record, isOpen, onClose }) {
           <div className="flex justify-end mb-2 -mt-2">
             <button
               onClick={onClose}
-              className="text-neutral-400 hover:text-black transition-colors"
+              className="text-[#c8c5ca] hover:text-[#1a1b22] transition-colors"
               aria-label="Close"
             >
               <MdClose className="text-2xl" />
@@ -91,7 +91,7 @@ function ScanDetailModal({ record, isOpen, onClose }) {
           {/* Meta row */}
           <div className="flex items-center gap-3 mt-4 text-sm text-[#47464a]">
             <span>{formatScanDate(record.scannedAt)}</span>
-            <span className="text-neutral-300">•</span>
+            <span className="text-[#c8c5ca]">•</span>
             <span>{formatConfidenceLabel(record.confidence)}</span>
           </div>
 
@@ -125,7 +125,7 @@ function ScanDetailModal({ record, isOpen, onClose }) {
 
           {/* Not a plant message */}
           {!record.isPlant && (
-            <div className="mt-5 bg-neutral-50 border border-neutral-100 rounded-2xl p-4">
+            <div className="mt-5 bg-[#f4f2fd] border border-[#eeedf7] rounded-2xl p-4">
               <p className="text-sm text-[#47464a]">
                 This image wasn't recognized as a plant.
               </p>
@@ -264,8 +264,9 @@ const handleViewDetails = (scanId) => {
   }
 
   return (
-    <div className="font-sans text-base antialiased overflow-x-hidden min-h-screen flex flex-col bg-[#fbf8ff]">
+    <div className="font-sans text-base antialiased overflow-x-hidden min-h-screen flex flex-col bg-[#fbf8ff] pb-28 md:pb-0">
       <Topbar />
+      <div className="block md:hidden"><MobileNav /></div>
 
       <DeleteModal
         isOpen={!!deleteTarget}
@@ -280,7 +281,7 @@ const handleViewDetails = (scanId) => {
         onClose={() => setDetailRecord(null)}
       />
 
-      <main className="flex-grow bg-neutral-50/60 px-4 md:px-6 py-8 md:py-10">
+      <main className="flex-grow bg-[#fbf8ff] px-4 md:px-6 py-8 md:py-10">
         <div className="max-w-3xl mx-auto">
 
           {/* Page Header */}
@@ -289,20 +290,20 @@ const handleViewDetails = (scanId) => {
 
             <div className="flex items-center gap-2 text-[#1b6b51] mb-3">
               <MdHistory className="text-lg" />
-              <span className="text-xs font-bold uppercase tracking-widest">Scan Records</span>
+              <span className="text-[11px] font-bold uppercase tracking-widest">Scan Records</span>
             </div>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold text-black tracking-tight">
+                <h1 className="text-3xl font-extrabold text-black tracking-tight">
                   Scanning History
                 </h1>
-                <p className="text-base text-[#47464a] mt-1">
+                <p className="text-sm text-[#47464a] mt-1">
                   {stats.total} total scan{stats.total !== 1 ? 's' : ''} recorded
                 </p>
               </div>
               <button
                 onClick={() => navigate('/diagnostic-scan')}
-                className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-95 transition-all self-start md:self-auto"
+                className="flex items-center gap-2 bg-[#1b6b51] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#237157] active:scale-95 transition-all self-start md:self-auto shadow-sm"
               >
                 <MdBiotech className="text-base" />
                 New Scan
@@ -336,7 +337,7 @@ const handleViewDetails = (scanId) => {
           {filteredRecords.length === 0 ? (
             <EmptyState
               filtered={activeFilter !== 'All' || records.length > 0}
-              onGoScan={() => navigate('/diagnostic')}
+              onGoScan={() => navigate('/diagnostic-scan')}
             />
           ) : (
             <div className="space-y-3">
@@ -361,7 +362,7 @@ const handleViewDetails = (scanId) => {
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="flex items-center gap-2 px-8 py-3 bg-white border border-neutral-200 rounded-2xl font-bold text-black hover:bg-neutral-50 transition-all shadow-sm text-sm disabled:opacity-50"
+                className="flex items-center gap-2 px-8 py-3 bg-white border border-[#c8c5ca] rounded-2xl font-bold text-black hover:bg-[#f4f2fd] transition-all shadow-sm text-sm disabled:opacity-50"
               >
                 {loadingMore
                   ? <span className="w-4 h-4 border-2 border-[#47464a] border-t-transparent rounded-full animate-spin" />

@@ -34,12 +34,9 @@ export default function ScanLogCard({ record, onViewDetails, onDelete, deleting,
   };
 
   return (
-    <div className="relative bg-white border border-neutral-200/60 rounded-2xl shadow-[0_2px_10px_-2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.06)] overflow-hidden">
+    <div className="relative group bg-white border border-[#c8c5ca]/60 rounded-2xl shadow-[0_2px_10px_-2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.06)] overflow-hidden">
 
-      {/* notebook margin line */}
-      <div className="absolute left-7 top-0 bottom-0 w-px bg-[#eeedf7]" />
-
-      <div className="pl-11 pr-4 py-4">
+      <div className="p-4">
 
         {/* Top row — title + 3-dot menu */}
         <div className="flex items-start justify-between gap-3">
@@ -70,7 +67,7 @@ export default function ScanLogCard({ record, onViewDetails, onDelete, deleting,
             {menuOpen && (
               <div
                 onClick={(e) => e.stopPropagation()}
-                className="absolute right-0 top-full mt-1 w-44 bg-white border border-neutral-200 rounded-xl shadow-[0_8px_24px_-6px_rgba(0,0,0,0.12)] py-1 z-10 animate-in fade-in zoom-in-95"
+                className="absolute right-0 top-full mt-1 w-44 bg-white border border-[#c8c5ca] rounded-xl shadow-[0_8px_24px_-6px_rgba(0,0,0,0.12)] py-1 z-10 animate-in fade-in zoom-in-95"
               >
                 <button
                   onClick={handleViewClick}
@@ -82,10 +79,10 @@ export default function ScanLogCard({ record, onViewDetails, onDelete, deleting,
                 <button
                   onClick={handleDeleteClick}
                   disabled={deleting}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#93000a] hover:bg-[#fdf0ee] transition-colors disabled:opacity-40"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
                 >
                   {deleting
-                    ? <span className="w-4 h-4 border-2 border-[#93000a]/40 border-t-[#93000a] rounded-full animate-spin" />
+                    ? <span className="w-4 h-4 border-2 border-red-600/40 border-t-red-600 rounded-full animate-spin" />
                     : <MdDeleteOutline className="text-base" />
                   }
                   Delete Record
@@ -96,7 +93,7 @@ export default function ScanLogCard({ record, onViewDetails, onDelete, deleting,
         </div>
 
         {/* dashed ruled line */}
-        <div className="border-t border-dashed border-neutral-200 my-3" />
+        <div className="border-t border-[#eeedf7] my-3" />
 
         {/* Bottom row — meta + status */}
         <div className="flex items-center justify-between gap-3 flex-wrap">

@@ -19,7 +19,7 @@ export default function UpcomingPanel({ items, overdueCount, onComplete, onDelet
 
       {/* ── Panel header ───────────────────────────────── */}
       <div className="flex items-center justify-between px-6 pt-6 pb-3 flex-shrink-0">
-        <h2 className="text-lg font-bold text-black dark:text-white tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        <h2 className="text-lg font-bold text-black dark:text-white tracking-tight">
           Next 48 Hours
         </h2>
         <div className="flex items-center gap-2">

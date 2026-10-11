@@ -13,13 +13,18 @@ import {
   orderBy,
   getDocs,
   getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
   doc,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
+import {
+  remoteThenLocal,
+  remoteThenLocalDoc,
+  createDocOnlineFirst,
+  updateDocOnlineFirst,
+  deleteDocOnlineFirst,
+  getActiveUserId,
+} from '../../../offline/offlineStore';
 
 
 // ─────────────────────────────────────────────────────────────
@@ -111,37 +116,38 @@ export function stageByKey(stageKey) {
 export async function fetchUserPlants(userId) {
   if (!userId) return [];
 
-  const q = query(
-    collection(db, 'userPlants'),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-  );
+  const docs = await remoteThenLocal(userId, 'userPlants', async () => {
+    const q = query(
+      collection(db, 'userPlants'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  });
 
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return docs.sort((a, b) => {
+    const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+    const db_ = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+    return db_ - da;
+  });
 }
 
-/**
- * Fetch a single userPlant document by its Firestore ID.
- *
- * @param {string} userPlantId
- * @returns {Promise<UserPlantDoc|null>}
- */
 export async function fetchUserPlantById(userPlantId) {
-  const snap = await getDoc(doc(db, 'userPlants', userPlantId));
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  const userId = getActiveUserId();
+  return remoteThenLocalDoc(userId, 'userPlants', userPlantId, async () => {
+    const snap = await getDoc(doc(db, 'userPlants', userPlantId));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  });
 }
 
-/**
- * Fetch the matching master plant for a userPlant.
- *
- * @param {string} plantId  – userPlant.plantId
- * @returns {Promise<PlantDoc|null>}
- */
 export async function fetchMasterPlant(plantId) {
   if (!plantId) return null;
-  const snap = await getDoc(doc(db, 'plants', plantId));
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  const userId = getActiveUserId();
+  return remoteThenLocalDoc(userId, 'plants', plantId, async () => {
+    const snap = await getDoc(doc(db, 'plants', plantId));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  });
 }
 
 
@@ -166,43 +172,41 @@ export async function fetchMasterPlant(plantId) {
  */
 export async function fetchStageLogs(userPlantId) {
   if (!userPlantId) return [];
+  const userId = getActiveUserId();
 
-  const q = query(
-    collection(db, 'stageLogs'),
-    where('userPlantId', '==', userPlantId),
-    orderBy('loggedAt', 'asc'),
-  );
+  const docs = await remoteThenLocal(userId, 'stageLogs', async () => {
+    const q = query(
+      collection(db, 'stageLogs'),
+      where('userPlantId', '==', userPlantId),
+      orderBy('loggedAt', 'asc'),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  });
 
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return docs
+    .filter((l) => l.userPlantId === userPlantId)
+    .sort((a, b) => {
+      const da = a.loggedAt?.toDate ? a.loggedAt.toDate() : new Date(a.loggedAt);
+      const db_ = b.loggedAt?.toDate ? b.loggedAt.toDate() : new Date(b.loggedAt);
+      return da - db_;
+    });
 }
 
-/**
- * Write a new stage log entry.
- *
- * @param {string} userPlantId
- * @param {string} stage
- * @param {string} [note]
- * @returns {Promise<string>}  – new log doc ID
- */
 export async function addStageLog(userPlantId, stage, note = '') {
-  const ref = await addDoc(collection(db, 'stageLogs'), {
+  const userId = getActiveUserId();
+  const created = await createDocOnlineFirst(userId, 'stageLogs', {
     userPlantId,
     stage,
     note,
     loggedAt: Timestamp.now(),
   });
-  return ref.id;
+  return created.id;
 }
 
-/**
- * Delete a stage log entry.
- *
- * @param {string} stageLogId
- * @returns {Promise<void>}
- */
 export async function deleteStageLog(stageLogId) {
-  await deleteDoc(doc(db, 'stageLogs', stageLogId));
+  const userId = getActiveUserId();
+  await deleteDocOnlineFirst(userId, 'stageLogs', stageLogId);
 }
 
 
@@ -220,8 +224,9 @@ export async function deleteStageLog(stageLogId) {
  * @returns {Promise<void>}
  */
 export async function updatePlantStage(userPlantId, newStageKey, note = '') {
+  const userId = getActiveUserId();
   await Promise.all([
-    updateDoc(doc(db, 'userPlants', userPlantId), {
+    updateDocOnlineFirst(userId, 'userPlants', userPlantId, {
       currentStage: newStageKey,
     }),
     addStageLog(userPlantId, newStageKey, note),

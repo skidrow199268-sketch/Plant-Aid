@@ -119,7 +119,7 @@ useEffect(() => {
               </div>
               <span
                 className="text-[17px] font-bold text-black dark:text-white tracking-[-0.03em]"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+               
               >
                 PlantAid
               </span>
@@ -183,7 +183,7 @@ useEffect(() => {
               <button
                 onClick={() => setShowModal(true)}
                 className="flex items-center gap-1.5 px-3 h-[34px] bg-[#1b6b51] text-white text-[13px] font-bold rounded-lg hover:bg-[#164f3c] active:scale-95 transition-all"
-                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+               
               >
                 <MdAddCircleOutline className="text-sm " />
                 <p className="hidden lg:block">Add Reminder</p>

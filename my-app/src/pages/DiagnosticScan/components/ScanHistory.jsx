@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MdHistory } from 'react-icons/md';
+import { MdHistory, MdChevronRight } from 'react-icons/md';
 import { IoLeaf } from 'react-icons/io5';
 
 function ScanThumb({ scan, formatDate }) {
@@ -28,7 +28,7 @@ function ScanThumb({ scan, formatDate }) {
   );
 }
 
-export default function ScanHistory({ history }) {
+export default function ScanHistory({ history, onViewAll }) {
   if (history.length === 0) return null;
 
   const formatDate = (ts) => {
@@ -39,9 +39,19 @@ export default function ScanHistory({ history }) {
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-4">
-      <div className="flex items-center gap-2 mb-3">
-        <MdHistory className="text-[#47464a]" />
-        <h3 className="text-sm font-bold text-[#47464a] uppercase tracking-widest">Recent Scans</h3>
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <MdHistory className="text-[#47464a]" />
+          <h3 className="text-sm font-bold text-[#47464a] uppercase tracking-widest">Recent Scans</h3>
+        </div>
+        {onViewAll && (
+          <button
+            onClick={onViewAll}
+            className="inline-flex items-center gap-1 text-xs font-bold text-[#1b6b51] hover:text-[#237157] transition-colors active:scale-95"
+          >
+            View all <MdChevronRight className="text-sm" />
+          </button>
+        )}
       </div>
       <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {history.map((scan) => (

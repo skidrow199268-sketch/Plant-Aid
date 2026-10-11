@@ -40,7 +40,7 @@ export default function TimelineItem({ item, onComplete, onDelete }) {
       <div className="w-3 h-3 rounded-full bg-white dark:bg-zinc-800 border-2 border-[#1b6b51] absolute left-[11px] top-[18px] z-10 transition-transform duration-200 group-hover:scale-125" />
 
       {/* Content */}
-      <div className="transition-transform duration-200 group-hover:translate-x-1 pr-16">
+      <div className="transition-transform duration-200 group-hover:translate-x-1 sm:pr-16">
         <div className="flex items-center gap-2 mb-0.5 flex-wrap">
           <span className="text-xs text-[#47464a]">
             {(rel === 'Today' || rel === 'Tomorrow')
@@ -61,7 +61,7 @@ export default function TimelineItem({ item, onComplete, onDelete }) {
         </div>
         <h4
           className="text-[16px] font-bold text-black dark:text-white group-hover:text-[#1b6b51] transition-colors leading-snug"
-          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}
+          style={{ letterSpacing: '-0.02em' }}
         >
           {item.title}
         </h4>
@@ -71,7 +71,7 @@ export default function TimelineItem({ item, onComplete, onDelete }) {
       </div>
 
       {/* Action buttons — visible on hover */}
-      <div className="absolute right-0 top-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+      <div className="absolute right-0 top-3 flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200">
         <button
           onClick={handleComplete}
           disabled={completing}

@@ -136,7 +136,7 @@ export default function PlantAidTaskManager() {
   return (
     <div
       className="bg-[#fbf8ff] text-[#1a1b22] min-h-screen flex flex-col font-sans relative overflow-x-hidden"
-      style={{ fontFamily: 'Manrope, sans-serif' }}
+     
     >
       {/* Desktop topbar — hidden on small screens */}
 <div className="hidden md:block">
@@ -164,7 +164,7 @@ export default function PlantAidTaskManager() {
 
       {/* Main */}
       <main
-        className={`max-w-7xl mx-auto lg:mt-14 md:mt-14 mt-0 px-4 md:px-6 py-8 pb-24 md:pb-8 w-full grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-300 ${
+        className={`max-w-7xl mx-auto lg:mt-14 md:mt-14 mt-0 px-4 md:px-6 py-8 pb-6 md:pb-8 w-full grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-300 ${
           modalOpen ? 'blur-sm opacity-40 pointer-events-none select-none' : ''
         }`}
         aria-hidden={modalOpen}
@@ -178,7 +178,7 @@ export default function PlantAidTaskManager() {
               <MdCalendarMonth className="text-base" />
               <span className="text-xs font-bold uppercase tracking-widest">Botanical Ward</span>
             </div>
-            <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.04em' }}>
+            <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight" style={{ letterSpacing: '-0.04em' }}>
               Your Care Tasks
             </h1>
             <p className="text-sm text-[#47464a] mt-1">Select a plant to manage treatment cycles and scheduled care.</p>
@@ -262,7 +262,7 @@ export default function PlantAidTaskManager() {
      <footer className="bg-[#fbf8ff] border-t border-[#c8c5ca]/60 py-6 px-4 flex flex-col items-center gap-2 mt-auto pb-20 md:pb-6">
         <div className="flex items-center gap-1.5">
           <IoLeaf className="text-[#1b6b51]" />
-          <span className="text-base font-bold text-black dark:text-white" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>PlantAid</span>
+          <span className="text-base font-bold text-black dark:text-white">PlantAid</span>
         </div>
         <div className="flex gap-5">
           <a className="text-xs text-[#47464a] hover:text-[#1b6b51] transition-colors" href="#">Sign up</a>

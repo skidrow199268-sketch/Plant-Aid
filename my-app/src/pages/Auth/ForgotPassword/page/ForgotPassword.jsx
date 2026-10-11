@@ -143,14 +143,14 @@ function OtpVerificationStep({ email, expectedOtp, onNext, onResend }) {
       </div>
 
       <form className="space-y-8" onSubmit={handleSubmit}>
-        <div className="flex justify-between gap-2">
+        <div className="grid grid-cols-6 gap-1.5">
           {inputRefs.map((ref, idx) => (
             <input
               key={idx}
               ref={ref}
               maxLength={1}
               onKeyUp={(e) => handleKeyUp(e, idx)}
-              className="w-12 h-14 sm:w-14 sm:h-16 bg-zinc-50 border border-zinc-200 rounded-xl text-center text-2xl font-bold focus:ring-4 focus:ring-[#1b6b51]/5 focus:border-[#1b6b51] outline-none transition-all text-zinc-900"
+              className="w-full h-14 sm:h-16 bg-zinc-50 border border-zinc-200 rounded-xl text-center text-2xl font-bold focus:ring-4 focus:ring-[#1b6b51]/5 focus:border-[#1b6b51] outline-none transition-all text-zinc-900"
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -312,8 +312,8 @@ export default function ForgotPasswordFlow() {
   };
 
   return (
-    <div className="bg-zinc-50/60 min-h-screen text-[#1a1b22] flex items-center justify-center p-4 antialiased">
-      <main className="w-full max-w-md bg-white dark:bg-[#1a1a1a] rounded-3xl border border-zinc-200/50 dark:border-zinc-700 shadow-sm p-8 md:p-10 relative overflow-hidden">
+    <div className="bg-[#fbf8ff] min-h-screen text-[#1a1b22] flex items-center justify-center p-4 antialiased">
+      <main className="w-full max-w-md bg-white dark:bg-[#1a1a1a] rounded-3xl border border-zinc-200/50 dark:border-zinc-700 shadow-sm p-6 sm:p-8 md:p-10 relative overflow-hidden">
 
         {/* Brand */}
         <div className="mb-8 flex flex-col items-center gap-2">

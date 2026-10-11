@@ -2,18 +2,42 @@
 @import "tailwindcss";
 @variant dark (:where(.dark) &);
 
-/* 2. Self-hosted Google Fonts via npm */
+/* 2. Self-hosted Google Font */
 @import "@fontsource/plus-jakarta-sans";
-@import "@fontsource/manrope";
 
-/* 3. Global styles and custom bento transition rules */
-body { 
-  font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif; 
-  -webkit-font-smoothing: antialiased; 
+/* 3. Design tokens */
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-headline: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand:       #1b6b51;
+  --color-brand-hover: #237157;
+  --color-brand-soft:  #a6f2d1;
+  --color-surface:     #fbf8ff;
+  --color-ink:         #1a1b22;
+  --color-muted:       #47464a;
+  --color-line:        #c8c5ca;
+  --color-lav:         #eeedf7;
 }
 
+/* 4. Global base */
+body { 
+  font-family: var(--font-sans); 
+  -webkit-font-smoothing: antialiased; 
+  background: var(--color-surface);
+}
+
+/* 5. Safe-area helpers (used by bottom navs / bottom sheets) */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility pb-safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+
 .font-headline { 
-  font-family: 'Plus Jakarta Sans', sans-serif; 
+  font-family: var(--font-headline); 
 }
 
 .bento-card { 

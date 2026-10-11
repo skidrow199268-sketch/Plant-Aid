@@ -6,7 +6,7 @@ export default function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-zinc-50 min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="bg-[#fbf8ff] min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
 
       {/* Minimal nav */}
       <header className="w-full h-16 bg-white border-b border-zinc-200/80 flex items-center px-4 md:px-6">

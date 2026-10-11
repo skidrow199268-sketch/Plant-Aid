@@ -3,17 +3,20 @@ import {
   query,
   where,
   orderBy,
-  limit,
   getDocs,
   getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
   doc,
-  serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
+import {
+  remoteThenLocal,
+  remoteThenLocalDoc,
+  createDocOnlineFirst,
+  updateDocOnlineFirst,
+  deleteDocOnlineFirst,
+  getActiveUserId,
+} from '../../../offline/offlineStore';
 
 
 // ─────────────────────────────────────────────────────────────
@@ -65,44 +68,50 @@ function fileToCompressedBase64(file, maxWidth = 1000, quality = 0.7) {
  * @returns {Promise<JournalDoc[]>}
  */
 export async function fetchJournals(userId) {
-  const q = query(
-    collection(db, 'journals'),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-  );
+  const docs = await remoteThenLocal(userId, 'journals', async () => {
+    const q = query(
+      collection(db, 'journals'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  });
 
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return docs.sort((a, b) => {
+    const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+    const db_ = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+    return db_ - da;
+  });
 }
 
-/**
- * Fetch a single journal entry by ID.
- *
- * @param {string} journalId
- * @returns {Promise<JournalDoc|null>}
- */
 export async function fetchJournalById(journalId) {
-  const snap = await getDoc(doc(db, 'journals', journalId));
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  const userId = getActiveUserId();
+  return remoteThenLocalDoc(userId, 'journals', journalId, async () => {
+    const snap = await getDoc(doc(db, 'journals', journalId));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  });
 }
 
-/**
- * Fetch journals for a specific userPlant.
- *
- * @param {string} userId
- * @param {string} userPlantId
- * @returns {Promise<JournalDoc[]>}
- */
 export async function fetchJournalsByPlant(userId, userPlantId) {
-  const q = query(
-    collection(db, 'journals'),
-    where('userId',      '==', userId),
-    where('userPlantId', '==', userPlantId),
-    orderBy('createdAt', 'desc'),
-  );
+  const docs = await remoteThenLocal(userId, 'journals', async () => {
+    const q = query(
+      collection(db, 'journals'),
+      where('userId',      '==', userId),
+      where('userPlantId', '==', userPlantId),
+      orderBy('createdAt', 'desc'),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  });
 
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return docs
+    .filter((j) => j.userPlantId === userPlantId)
+    .sort((a, b) => {
+      const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+      const db_ = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+      return db_ - da;
+    });
 }
 
 
@@ -136,19 +145,7 @@ export async function createJournal(userId, {
     imageUrl = await fileToCompressedBase64(imageFile);
   }
 
-  const docRef = await addDoc(collection(db, 'journals'), {
-    userId,
-    userPlantId,
-    customPlantLabel,
-    title:     title.trim(),
-    content:   content.trim(),
-    imageUrl,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-
-  return {
-    id: docRef.id,
+  const payload = {
     userId,
     userPlantId,
     customPlantLabel,
@@ -158,6 +155,8 @@ export async function createJournal(userId, {
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   };
+
+  return createDocOnlineFirst(userId, 'journals', payload);
 }
 
 
@@ -189,7 +188,7 @@ export async function updateJournal(journalId, userId, {
   removeImage = false,
 }) {
   const updates = {
-    updatedAt: serverTimestamp(),
+    updatedAt: Timestamp.now(),
   };
 
   if (title             !== undefined) updates.title             = title.trim();
@@ -203,36 +202,19 @@ export async function updateJournal(journalId, userId, {
     updates.imageUrl = '';
   }
 
-  await updateDoc(doc(db, 'journals', journalId), updates);
+  await updateDocOnlineFirst(userId, 'journals', journalId, updates);
 
   return { imageUrl: updates.imageUrl };
 }
 
-
-// ─────────────────────────────────────────────────────────────
-// 4. DELETE JOURNAL
-// ─────────────────────────────────────────────────────────────
-
-/**
- * Delete a journal entry from Firestore.
- *
- * @param {string} journalId
- * @returns {Promise<void>}
- */
 export async function deleteJournal(journalId) {
-  await deleteDoc(doc(db, 'journals', journalId));
+  const userId = getActiveUserId();
+  await deleteDocOnlineFirst(userId, 'journals', journalId);
 }
 
-/**
- * Delete a journal entry. Kept for compatibility with existing calls —
- * no separate image cleanup needed since images are stored inline.
- *
- * @param {string} journalId
- * @param {string} [imageUrl] – unused, kept for signature compatibility
- * @returns {Promise<void>}
- */
 export async function deleteJournalWithImage(journalId, imageUrl) {
-  await deleteDoc(doc(db, 'journals', journalId));
+  void imageUrl;
+  await deleteJournal(journalId);
 }
 
 

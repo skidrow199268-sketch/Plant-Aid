@@ -102,7 +102,7 @@ export default function AddReminderModal({ userId, onClose }) {
         <div className="flex items-center justify-between">
           <h2
             className="text-base sm:text-lg font-bold text-black dark:text-white tracking-tight"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+           
           >
             New Reminder
           </h2>
@@ -220,7 +220,7 @@ export default function AddReminderModal({ userId, onClose }) {
             onClick={handleSave}
             disabled={saving || saved}
             className="flex-1 py-2.5 sm:py-3 rounded-xl bg-black text-white text-sm font-bold hover:opacity-90 disabled:opacity-50 transition-all active:scale-[0.97] flex items-center justify-center gap-2"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+           
           >
             {saving
               ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

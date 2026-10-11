@@ -13,8 +13,8 @@ export default function FilterBar({ active, onChange }) {
           onClick={() => onChange(f)}
           className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
             active === f
-              ? 'bg-black text-white shadow-sm'
-              : 'bg-white border border-neutral-200/80 text-[#47464a] hover:border-[#1b6b51]/40'
+              ? 'bg-[#1b6b51] text-white shadow-sm'
+              : 'bg-white border border-[#c8c5ca] text-[#47464a] hover:border-[#1b6b51]/40'
           }`}
         >
           {f}

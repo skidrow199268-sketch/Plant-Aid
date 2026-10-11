@@ -3,11 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Auth/Service/AuthContext';
 import { Topbar, FullPageLoader, MobileNav } from '../../../components/index';
 import {loadDirectoryData, togglePlantInGarden,inferCategory,} from '../services/PlantService';
+import { seedPlants } from '../seeder/Plantseeder';
 import { MdSearch} from 'react-icons/md';
 import { IoLeaf } from 'react-icons/io5';
+import { FaSeedling } from 'react-icons/fa6';
 import {CATEGORIES} from '../constant/plant'
 
-import {EmptyState,GardenBadge,PlantRow,Toast} from '../components/index'
+import {EmptyState,GardenBadge,Pagination,PlantRow,Toast} from '../components/index'
+
+const PAGE_SIZE = 20;
 
 export default function PlantDirectory() {
   const navigate                  = useNavigate();
@@ -20,7 +24,7 @@ export default function PlantDirectory() {
   const [togglingIds,   setTogglingIds]   = useState(new Set());   
   const [loadingData,   setLoadingData]   = useState(true);
   const [dataError,     setDataError]     = useState(null);
-  const [visibleCount, setVisibleCount] = useState(20);
+  const [currentPage,   setCurrentPage]   = useState(1);
  
 
   // ── Filter state ─────────────────────────────────────────
@@ -31,17 +35,23 @@ export default function PlantDirectory() {
   // ── Toast ────────────────────────────────────────────────
   const [toast,        setToast]        = useState({ message: '', visible: false });
   const toastTimer                      = useRef(null);
+  const listRef                         = useRef(null);
 
 
-useEffect(() => {
-  setVisibleCount(20);
-}, [deferredQuery, activeCategory]);
 
   const showToast = useCallback((message) => {
     clearTimeout(toastTimer.current);
     setToast({ message, visible: true });
     toastTimer.current = setTimeout(() => setToast((t) => ({ ...t, visible: false })), 2500);
   }, []);
+
+  // ── Pagination ────────────────────────────────────────────
+  const handlePageChange = useCallback((page) => {
+    setCurrentPage(page);
+    listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  // ── SEED BUTTON (dev tool) — REMOVE AFTER SEEDING ─────────
 
 
   useEffect(() => {
@@ -122,7 +132,9 @@ useEffect(() => {
     return a.localeCompare(b);
   })];
 
-   const visiblePlants = filteredPlants.slice(0, visibleCount);
+   const totalPages = Math.max(1, Math.ceil(filteredPlants.length / PAGE_SIZE));
+   const safePage = Math.min(currentPage, totalPages);
+   const visiblePlants = filteredPlants.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   // ── Show full-page loader ─────────────────────────────────
   if (loadingData) {
@@ -130,7 +142,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="bg-zinc-50 text-zinc-800 min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="bg-[#fbf8ff] text-[#1a1b22] min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900 pb-28 md:pb-0">
       <Topbar />
       {/* Desktop topbar — hidden on small screens */}
 
@@ -142,13 +154,18 @@ useEffect(() => {
       <main className="flex-grow w-full max-w-5xl mx-auto px-4 md:px-6 py-10">
 
         {/* Page Header */}
-        <header className="mb-10 space-y-1">
-          <h1 className="text-4xl font-extrabold text-zinc-900 tracking-tight md:text-5xl">
-            Plant Directory
-          </h1>
-          <p className="text-base font-medium text-zinc-400">
-            Explore and discover new specimens for your collection.
-          </p>
+        <header className="mb-10 flex items-start justify-between gap-4">
+          <div className="space-y-2">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#1b6b51]">Directory</p>
+            <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">
+              Plant Directory
+            </h1>
+            <p className="text-sm text-[#47464a]">
+              Explore and discover new specimens for your collection.
+            </p>
+          </div>
+=
+      
         </header>
 
         {/* Error Banner */}
@@ -171,11 +188,11 @@ useEffect(() => {
               placeholder="Search plants, scientific names, or descriptions…"
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery('')}
+                onClick={() => { setSearchQuery(''); setCurrentPage(1); }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors text-sm font-semibold"
               >
                 ✕
@@ -190,7 +207,7 @@ useEffect(() => {
               return (
                 <button
                   key={cat}
-                  onClick={() => setActiveCategory(cat)}
+                  onClick={() => { setActiveCategory(cat); setCurrentPage(1); }}
                   className={`px-4 py-2 rounded-xl text-sm transition-all whitespace-nowrap font-medium ${
                     isActive
                       ? 'bg-zinc-950 text-white font-semibold shadow-sm'
@@ -227,7 +244,7 @@ useEffect(() => {
         </section>
 
         {/* Plant List */}
-        <section>
+        <section ref={listRef} className="scroll-mt-28">
           {filteredPlants.length === 0 ? (
   <EmptyState query={deferredQuery} category={activeCategory} />
 ) : (
@@ -245,29 +262,15 @@ useEffect(() => {
 )}
         </section>
 
-        {/* Load more placeholder (extend as needed) */}
-  
-
-{(filteredPlants.length > visibleCount || visibleCount > 20) && (
-  <div className="mt-12 flex justify-center gap-3">
-    {filteredPlants.length > visibleCount && (
-      <button
-        onClick={() => setVisibleCount((c) => c + 20)}
-        className="px-8 py-3 bg-white border border-zinc-200 rounded-2xl font-bold text-zinc-800 hover:bg-zinc-50 transition-all shadow-sm text-sm"
-      >
-        View More Specimens
-      </button>
-    )}
-    {visibleCount > 20 && (
-      <button
-        onClick={() => setVisibleCount(20)}
-        className="px-8 py-3 bg-white border border-zinc-200 rounded-2xl font-bold text-zinc-800 hover:bg-zinc-50 transition-all shadow-sm text-sm"
-      >
-        View Less
-      </button>
-    )}
-  </div>
-)}
+        {/* Pagination */}
+        {filteredPlants.length > PAGE_SIZE && (
+          <Pagination
+            currentPage={safePage}
+            totalItems={filteredPlants.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={handlePageChange}
+          />
+        )}
       </main>
 
       <footer className="bg-white flex flex-col items-center gap-2 w-full px-6 mt-auto py-6 border-t border-zinc-200/80">

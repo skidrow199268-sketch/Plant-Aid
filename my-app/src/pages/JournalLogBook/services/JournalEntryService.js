@@ -10,36 +10,35 @@ import {
   where,
   orderBy,
   getDocs,
-  addDoc,
-  serverTimestamp,
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
+import {
+  remoteThenLocal,
+  createDocOnlineFirst,
+} from '../../../offline/offlineStore';
 
 
 // ─────────────────────────────────────────────────────────────
 // 1. USER PLANTS  (for the plant selector dropdown)
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Fetch all userPlants for a user — used to populate the
- * "Select Plant" dropdown in the editor.
- *
- * @param {string} userId
- * @returns {Promise<UserPlantDoc[]>}
- *
- * UserPlantDoc shape:
- * { id, userId, plantId, nickname, currentStage, imageUrl, createdAt }
- */
 export async function fetchUserPlantsForSelector(userId) {
-  const q = query(
-    collection(db, 'userPlants'),
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-  );
+  const docs = await remoteThenLocal(userId, 'userPlants', async () => {
+    const q = query(
+      collection(db, 'userPlants'),
+      where('userId', '==', userId),
+      orderBy('createdAt', 'desc'),
+    );
+    const snap = await getDocs(q);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  });
 
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return docs.sort((a, b) => {
+    const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+    const db_ = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt);
+    return db_ - da;
+  });
 }
 
 
@@ -47,46 +46,22 @@ export async function fetchUserPlantsForSelector(userId) {
 // 2. PUBLISH JOURNAL ENTRY
 // ─────────────────────────────────────────────────────────────
 
-/**
- * Publish (create) a new journal entry in Firestore.
- *
- * @param {string}    userId
- * @param {object}    data
- * @param {string}    data.title
- * @param {string}    data.content
- * @param {string}    [data.userPlantId]  – selected plant id (optional)
- * @returns {Promise<JournalDoc>}         – newly created journal with id
- *
- * JournalDoc shape (matches Firestore schema):
- * { id, userId, userPlantId, title, content, imageUrl, createdAt, updatedAt }
- */
 export async function publishJournalEntry(userId, {
   title,
   content,
   userPlantId = '',
 }) {
-  let imageUrl = '';
-
-  const docRef = await addDoc(collection(db, 'journals'), {
+  const payload = {
     userId,
     userPlantId,
     title:     title.trim(),
     content:   content.trim(),
-    imageUrl,
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  });
-
-  return {
-    id: docRef.id,
-    userId,
-    userPlantId,
-    title:     title.trim(),
-    content:   content.trim(),
-    imageUrl,
+    imageUrl:  '',
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   };
+
+  return createDocOnlineFirst(userId, 'journals', payload);
 }
 
 

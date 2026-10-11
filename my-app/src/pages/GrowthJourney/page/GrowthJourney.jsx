@@ -189,7 +189,7 @@ export default function GrowthJourney() {
   if (loadingList) return <FullPageLoader message="Loading your growth journey" />;
 
   return (
-    <div className="bg-[#f7faf7] pb-20 lg:pb-0 text-zinc-800 min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
+    <div className="bg-[#fbf8ff] pb-28 md:pb-0 text-zinc-800 min-h-screen flex flex-col antialiased selection:bg-emerald-100 selection:text-emerald-900">
       
       
 <div className="hidden md:block">
@@ -201,14 +201,15 @@ export default function GrowthJourney() {
   <MobileSectionNav />
 </div>
 
-      <main className="flex-grow w-full max-w-6xl mx-auto px-4 md:px-6 py-10">
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 md:px-6 py-10">
 
         {/* Page Header */}
         <header className="mb-8 space-y-1">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-zinc-900 tracking-tight">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-[#1b6b51]">Growth Journey</p>
+          <h1 className="text-3xl font-extrabold text-zinc-900 tracking-tight">
             Growth Journey
           </h1>
-          <p className="text-base font-medium text-zinc-400">
+          <p className="text-sm text-[#47464a]">
             Monitor your botanical assets from germination through harvest.
           </p>
         </header>
@@ -259,7 +260,7 @@ export default function GrowthJourney() {
 
               {/* Stats row */}
               {selectedPlant && (
-                <div className="mb-6 flex gap-3 overflow-x-auto [scrollbar-width:none] pb-1">
+                <div className="mb-6 flex gap-2 overflow-x-auto [scrollbar-width:none] pb-1">
                   <StatChip icon={<MdCalendarToday />} label="Days Growing"  value={days} />
                   <StatChip icon={<MdEco />}           label="Stage"         value={`${currentStageIdx + 1}/${GROWTH_STAGES.length}`} />
                   <StatChip icon={<MdSpa />}           label="Log Entries"   value={stageLogs.length} />
@@ -291,7 +292,9 @@ export default function GrowthJourney() {
       </main>
 
       {/* Footer */}
-     <Footer/>
+      <div className="hidden lg:block">
+        <Footer />
+      </div>
 
       <Toast message={toast.message} visible={toast.visible} />
     </div>

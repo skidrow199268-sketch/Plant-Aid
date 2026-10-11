@@ -42,7 +42,7 @@ import NotFound from './middleware/NotFound'
 
 export default function App() {
   return (
-   <div className="w-full h-screen">
+   <div className="w-full min-h-dvh">
     
       <Routes>
         {/* Auth Routes */}

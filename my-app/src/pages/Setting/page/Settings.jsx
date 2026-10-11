@@ -95,7 +95,7 @@ export default function PlantAidSettingsView() {
 
 
       <div
-        className="min-h-screen flex flex-col text-[#1a1b22] bg-[#f4f2fd]/60 m-6"
+        className="min-h-screen flex flex-col text-[#1a1b22] bg-[#fbf8ff] md:m-6"
         style={{ animation: 'fadeIn 0.4s ease-in-out' }}
       >
         <Topbar />
@@ -103,7 +103,7 @@ export default function PlantAidSettingsView() {
   <MobileNav/>
 </div>
 
-        <main className="flex-grow w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-14">
+        <main className="flex-grow w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-14 pb-28 md:pb-8">
 
           {error && (
             <div className="mb-6 bg-red-50 border border-red-100 text-red-600 text-sm rounded-2xl px-4 py-3 flex items-center gap-2">

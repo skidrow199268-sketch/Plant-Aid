@@ -14,7 +14,7 @@ export default function ActivePrescriptions({ tasks, userPlants }) {
 
   return (
     <div className="bg-[#a6f2d1]/20 rounded-3xl p-5 h-full">
-      <h2 className="text-base font-bold text-[#1b6b51] mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <h2 className="text-base font-bold text-[#1b6b51] mb-4">
         Active Prescriptions
       </h2>
 

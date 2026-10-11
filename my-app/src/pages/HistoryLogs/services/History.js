@@ -14,11 +14,17 @@ import {
   startAfter,
   getDocs,
   getDoc,
-  deleteDoc,
   doc,
-  Timestamp,
 } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
+import {
+  readAll,
+  remoteThenLocalDoc,
+  deleteDocOnlineFirst,
+  getActiveUserId,
+  isOnline,
+  upsertAndReapply,
+} from '../../../offline/offlineStore';
 
 
 // ─────────────────────────────────────────────────────────────
@@ -50,29 +56,52 @@ import { db } from '../../../firebase/firebase';
  *   scannedAt:          Timestamp,
  * }
  */
-export async function fetchScanHistory(userId, pageSize = 20, lastDoc = null) {
-  let q = query(
-    collection(db, 'identificationHistory'),
-    where('userId', '==', userId),
-    orderBy('scannedAt', 'desc'),
-    limit(pageSize),
-  );
+const sortByScannedDesc = (docs) =>
+  [...docs].sort((a, b) => {
+    const da = a.scannedAt?.toDate ? a.scannedAt.toDate() : new Date(a.scannedAt);
+    const db_ = b.scannedAt?.toDate ? b.scannedAt.toDate() : new Date(b.scannedAt);
+    return db_ - da;
+  });
 
-  if (lastDoc) {
-    q = query(
-      collection(db, 'identificationHistory'),
-      where('userId', '==', userId),
-      orderBy('scannedAt', 'desc'),
-      startAfter(lastDoc),
-      limit(pageSize),
-    );
+export async function fetchScanHistory(userId, pageSize = 20, lastDoc = null) {
+  const isSnapshot = lastDoc && typeof lastDoc === 'object' && !('__offset' in lastDoc);
+  const isOffset = lastDoc && typeof lastDoc === 'object' && '__offset' in lastDoc;
+
+  // Online: hit Firestore, then refresh the local cache.
+  if (isOnline() && !isOffset) {
+    try {
+      const snap = await (async () => {
+        const base = [
+          collection(db, 'identificationHistory'),
+          where('userId', '==', userId),
+          orderBy('scannedAt', 'desc'),
+        ];
+        const q = isSnapshot
+          ? query(...base, startAfter(lastDoc), limit(pageSize))
+          : query(...base, limit(pageSize));
+        return getDocs(q);
+      })();
+      const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      const last = snap.docs.length === pageSize ? snap.docs[snap.docs.length - 1] : null;
+      upsertAndReapply(userId, 'identificationHistory', docs);
+      return { records: docs, lastDoc: last };
+    } catch (err) {
+      if (!isNetworkErrorSafe(err)) throw err;
+      // Fall through to cached data.
+    }
   }
 
-  const snap = await getDocs(q);
-  const records = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-  const newLastDoc = snap.docs.length === pageSize ? snap.docs[snap.docs.length - 1] : null;
+  // Offline: page through the local cache.
+  const cached = sortByScannedDesc(readAll(userId, 'identificationHistory'));
+  const offset = isOffset ? lastDoc.__offset : 0;
+  const slice = cached.slice(offset, offset + pageSize);
+  const nextOffset = offset + slice.length;
+  const nextCursor = nextOffset < cached.length ? { __offset: nextOffset } : null;
+  return { records: slice, lastDoc: nextCursor };
+}
 
-  return { records, lastDoc: newLastDoc };
+function isNetworkErrorSafe(err) {
+  return !navigator.onLine || /unavailable|network-request-failed|deadline|cancelled/.test(String(err?.code ?? ''));
 }
 
 
@@ -87,8 +116,11 @@ export async function fetchScanHistory(userId, pageSize = 20, lastDoc = null) {
  * @returns {Promise<ScanRecord|null>}
  */
 export async function fetchScanById(scanId) {
-  const snap = await getDoc(doc(db, 'identificationHistory', scanId));
-  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  const userId = getActiveUserId();
+  return remoteThenLocalDoc(userId, 'identificationHistory', scanId, async () => {
+    const snap = await getDoc(doc(db, 'identificationHistory', scanId));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  });
 }
 
 
@@ -103,7 +135,8 @@ export async function fetchScanById(scanId) {
  * @returns {Promise<void>}
  */
 export async function deleteScanRecord(scanId) {
-  await deleteDoc(doc(db, 'identificationHistory', scanId));
+  const userId = getActiveUserId();
+  await deleteDocOnlineFirst(userId, 'identificationHistory', scanId);
 }
 
 

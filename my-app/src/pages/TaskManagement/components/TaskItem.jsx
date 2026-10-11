@@ -51,7 +51,7 @@ export default function TaskItem({ task, userPlants, onToggle, onDelete }) {
         </div>
         <h4 className={`text-sm font-bold leading-snug ${
           task.completed ? 'line-through text-[#47464a] dark:text-gray-500' : 'text-black dark:text-white'
-        }`} style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+        }`}>
           {task.title}
         </h4>
         {plantName && (
@@ -76,7 +76,7 @@ export default function TaskItem({ task, userPlants, onToggle, onDelete }) {
         </button>
         <button
           onClick={() => onDelete(task)}
-          className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors text-[#c8c5ca] opacity-0 group-hover:opacity-100"
+          className="p-1.5 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors text-[#c8c5ca] opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
           title="Delete task"
         >
           <MdDelete className="text-lg" />

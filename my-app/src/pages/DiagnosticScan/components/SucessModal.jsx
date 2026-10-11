@@ -26,7 +26,7 @@ export default function ScanSuccessModal({ isOpen, onClose, onSave, plantData, s
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 antialiased"
-      style={{ fontFamily: "'Manrope', sans-serif" }}
+     
     >
       <div className="absolute inset-0" onClick={onClose} />
 
@@ -56,7 +56,7 @@ export default function ScanSuccessModal({ isOpen, onClose, onSave, plantData, s
             <p className="text-[10px] font-bold text-[#1b6b51] uppercase tracking-widest mb-1">Identified</p>
             <h2
               className="text-xl font-extrabold text-black dark:text-white leading-tight"
-              style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+             
             >
               {plantInfo.name}
             </h2>
@@ -132,7 +132,7 @@ export default function ScanSuccessModal({ isOpen, onClose, onSave, plantData, s
             onClick={onSave}
             disabled={analysisLoading || saving}
             className="w-full bg-black text-white font-bold text-sm py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+           
           >
             <MdLibraryAdd className="text-lg" />
             <span className="truncate">

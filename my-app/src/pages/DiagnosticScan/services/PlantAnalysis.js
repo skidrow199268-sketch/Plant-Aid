@@ -30,14 +30,14 @@ import {GEMINI_MODELS} from '../constant/gemeni_model'
 // ─────────────────────────────────────────────────────────────
 
 
-async function tryModel(model, prompt) {
+async function tryModel(model, prompt, imageParts = []) {
   const url = `${GEMINI_BASE}/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
   const response = await fetch(url, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
+      contents: [{ parts: [{ text: prompt }, ...imageParts] }],
       generationConfig: {
         temperature:     0.3,
         maxOutputTokens: 2048,
@@ -82,7 +82,7 @@ const cleaned = rawText
 }
 
 
-async function callGeminiApi(prompt) {
+export async function callGeminiApi(prompt, imageParts = []) {
   if (!GEMINI_API_KEY) {
     throw new Error('[PlantAnalysis] VITE_GEMINI_API_KEY is not set in your .env file.');
   }
@@ -91,7 +91,7 @@ async function callGeminiApi(prompt) {
 
   for (const model of GEMINI_MODELS) {
     try {
-      const result = await tryModel(model, prompt);
+      const result = await tryModel(model, prompt, imageParts);
       console.log(`[PlantAnalysis] Successfully used model: "${model}"`);
       return result;
     } catch (err) {
