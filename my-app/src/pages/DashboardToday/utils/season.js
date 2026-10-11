@@ -2,14 +2,20 @@
 // season.js
 // Country- and hemisphere-aware season resolution.
 //
-// Tropical countries (e.g. the Philippines) follow a wet/dry
-// season cycle instead of the temperate spring / summer /
-// autumn / winter model. Temperate countries fall back to the
-// four-season model, flipped for the southern hemisphere.
+// Naming follows how people actually talk about the weather:
+//   • Tropical / monsoon countries (e.g. the Philippines) have a
+//     Rainy Season and a Dry Season — never winter.
+//   • Temperate countries use the familiar four seasons
+//     (Spring / Summer / Autumn / Winter), flipped south of the
+//     equator.
+//
+// The country is checked first so a tropical country is never
+// given a temperate label (and vice-versa). Latitude is only used
+// as a fallback when the country is unknown.
 // ============================================================
 
 // Countries whose climate is best described by a tropical
-// wet/dry season cycle rather than four distinct seasons.
+// rainy/dry season cycle rather than four distinct seasons.
 const TROPICAL_COUNTRIES = new Set([
   // Southeast Asia
   'PH', 'ID', 'MY', 'SG', 'TH', 'VN', 'KH', 'LA', 'MM', 'BN', 'TL',
@@ -29,18 +35,42 @@ const TROPICAL_COUNTRIES = new Set([
   'FM', 'MH', 'PW', 'GU',
 ]);
 
+// Countries with four distinct seasons. Listing them explicitly keeps
+// their labels stable even when their latitude drifts near the tropics
+// (e.g. northern Egypt or Saudi Arabia, which do get a cool season).
+const TEMPERATE_COUNTRIES = new Set([
+  // North America
+  'US', 'CA',
+  // Europe
+  'GB', 'IE', 'FR', 'DE', 'NL', 'BE', 'LU', 'CH', 'AT', 'IT', 'ES',
+  'PT', 'PL', 'CZ', 'SK', 'HU', 'RO', 'BG', 'GR', 'HR', 'RS', 'BA',
+  'SI', 'ME', 'MK', 'AL', 'DK', 'SE', 'NO', 'FI', 'IS', 'EE', 'LV',
+  'LT', 'UA', 'BY', 'MD', 'RU', 'TR', 'GE', 'AM', 'AZ',
+  // Central Asia
+  'KZ', 'UZ', 'TM', 'KG', 'TJ', 'MN',
+  // East Asia
+  'CN', 'JP', 'KR', 'KP', 'TW', 'HK', 'MO',
+  // Oceania
+  'AU', 'NZ',
+  // South America (temperate band)
+  'CL', 'AR', 'UY',
+  // North Africa & Middle East
+  'ZA', 'MA', 'DZ', 'TN', 'LY', 'EG', 'IL', 'PS', 'JO', 'LB', 'SY',
+  'IQ', 'IR', 'SA', 'AE', 'QA', 'KW', 'BH', 'OM',
+]);
+
 // Country-specific season names and month windows.
 // Months are 0-based (JS Date.getMonth()).
 const COUNTRY_SEASONS = {
   PH: {
-    wet: { label: 'Wet Season', local: 'Tag-ulan', months: [5, 6, 7, 8, 9, 10] },
-    dry: { label: 'Dry Season', local: 'Tag-init', months: [11, 0, 1, 2, 3, 4] },
+    rainy: { label: 'Rainy Season', local: 'Tag-ulan',  months: [5, 6, 7, 8, 9, 10] },
+    dry:   { label: 'Dry Season',   local: 'Tag-init',  months: [11, 0, 1, 2, 3, 4] },
   },
 };
 
 // Generic monsoon windows for tropical countries without an override.
-const NORTHERN_WET_MONTHS = [4, 5, 6, 7, 8, 9];
-const SOUTHERN_WET_MONTHS = [10, 11, 0, 1, 2, 3];
+const NORTHERN_RAINY_MONTHS = [4, 5, 6, 7, 8, 9];
+const SOUTHERN_RAINY_MONTHS = [10, 11, 0, 1, 2, 3];
 
 const TEMPERATE = {
   north: {
@@ -64,16 +94,28 @@ const TEMPERATE_LABELS = {
   winter: 'Winter',
 };
 
-function isTropical(country, lat) {
-  if (country && TROPICAL_COUNTRIES.has(country.toUpperCase())) return true;
-  if (typeof lat === 'number' && !Number.isNaN(lat)) return Math.abs(lat) < 23.44;
-  return false;
+/**
+ * Decide whether a location follows the tropical rainy/dry cycle or the
+ * temperate four-season cycle. Country wins over latitude so a tropical
+ * country is never given a temperate season (and vice-versa).
+ * @param {string} country ISO-3166 alpha-2 country code (upper-case)
+ * @param {number|undefined} lat
+ * @returns {'tropical'|'temperate'}
+ */
+function resolveClimate(country, lat) {
+  if (country && TROPICAL_COUNTRIES.has(country)) return 'tropical';
+  if (country && TEMPERATE_COUNTRIES.has(country)) return 'temperate';
+  if (typeof lat === 'number' && !Number.isNaN(lat)) {
+    // Tropic of Cancer / Capricorn.
+    return Math.abs(lat) < 23.44 ? 'tropical' : 'temperate';
+  }
+  return 'temperate';
 }
 
 /**
  * Resolve the current season for a weather payload.
  * @param {{ country?: string, lat?: number } | null} weather
- * @returns {{ key: 'wet'|'dry'|'spring'|'summer'|'autumn'|'winter', label: string } | null}
+ * @returns {{ key: 'rainy'|'dry'|'spring'|'summer'|'autumn'|'winter', label: string } | null}
  */
 export function getSeason(weather) {
   if (!weather) return null;
@@ -83,17 +125,17 @@ export function getSeason(weather) {
   const lat = weather.lat;
   const southern = typeof lat === 'number' && lat < 0;
 
-  if (isTropical(country, lat)) {
+  if (resolveClimate(country, lat) === 'tropical') {
     const override = COUNTRY_SEASONS[country];
-    const wetMonths = override
-      ? override.wet.months
+    const rainyMonths = override
+      ? override.rainy.months
       : southern
-        ? SOUTHERN_WET_MONTHS
-        : NORTHERN_WET_MONTHS;
+        ? SOUTHERN_RAINY_MONTHS
+        : NORTHERN_RAINY_MONTHS;
 
-    if (wetMonths.includes(month)) {
-      const wet = override?.wet;
-      return { key: 'wet', label: wet ? `${wet.label} (${wet.local})` : 'Wet Season' };
+    if (rainyMonths.includes(month)) {
+      const rainy = override?.rainy;
+      return { key: 'rainy', label: rainy ? `${rainy.label} (${rainy.local})` : 'Rainy Season' };
     }
 
     const dry = override?.dry;
@@ -115,7 +157,7 @@ export function getSeasonalTip(weather) {
   if (!season) return '';
 
   switch (season.key) {
-    case 'wet':
+    case 'rainy':
       return `${season.label} is here — frequent rain means water sparingly and keep drainage clear to prevent root rot.`;
     case 'dry':
       return `${season.label} is here — soil dries out fast, so check moisture often and water deeply in the morning.`;

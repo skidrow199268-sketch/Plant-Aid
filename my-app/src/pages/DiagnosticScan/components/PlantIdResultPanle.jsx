@@ -8,6 +8,7 @@ import { ConfidenceBar,PlantAnalysisCard } from '../components/index';
 import {
   MdCheckCircle,
   MdWarning,
+  MdHelpOutline,
   MdLocalFlorist,
   MdBiotech,
   MdOpenInNew,
@@ -20,7 +21,10 @@ import { IoLeaf } from 'react-icons/io5';
 
 export default function PlantIdResultPanel({ result, preview, onRetry, analysis, analysisLoading, analysisError }) {
   const [activeTab, setActiveTab] = useState('identification');
-  const healthCfg = getHealthConfig(result.isHealthy, result.isHealthyScore);
+  const healthCfg = getHealthConfig(result.isHealthy, result.isHealthyScore, {
+    assessed: result.healthAssessed !== false,
+    diseaseCount: result.diseases?.length ?? 0,
+  });
   const topMatch  = result.suggestions[0];
 
   return (
@@ -43,7 +47,11 @@ export default function PlantIdResultPanel({ result, preview, onRetry, analysis,
                 {topMatch?.name && <p className="text-sm italic text-[#47464a] mt-0.5">{topMatch.name}</p>}
               </div>
               <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-bold flex-shrink-0 ${healthCfg.bg} ${healthCfg.text} ${healthCfg.border}`}>
-                {result.isHealthy ? <MdCheckCircle className="text-sm" /> : <MdWarning className="text-sm" />}
+                {healthCfg.assessed === false
+                  ? <MdHelpOutline className="text-sm" />
+                  : result.isHealthy
+                    ? <MdCheckCircle className="text-sm" />
+                    : <MdWarning className="text-sm" />}
                 {healthCfg.label}
               </span>
             </div>
@@ -132,17 +140,30 @@ export default function PlantIdResultPanel({ result, preview, onRetry, analysis,
       {activeTab === 'health' && (
         <div className="bg-white rounded-3xl border border-[#c8c5ca]/40 p-6 space-y-5 shadow-[0_8px_30px_rgba(0,0,0,0.03)]">
           <div className={`flex items-center gap-3 p-4 rounded-2xl border ${healthCfg.bg} ${healthCfg.border}`}>
-            {result.isHealthy
-              ? <MdCheckCircle className={`text-2xl ${healthCfg.text}`} />
-              : <MdWarning     className={`text-2xl ${healthCfg.text}`} />
+            {healthCfg.assessed === false
+              ? <MdHelpOutline  className={`text-2xl ${healthCfg.text}`} />
+              : result.isHealthy
+                ? <MdCheckCircle className={`text-2xl ${healthCfg.text}`} />
+                : <MdWarning     className={`text-2xl ${healthCfg.text}`} />
             }
             <div>
               <p className={`text-sm font-bold ${healthCfg.text}`}>Overall: {healthCfg.label}</p>
-              <p className={`text-xs ${healthCfg.text} opacity-70`}>{formatConfidence(result.isHealthyScore)} healthy probability</p>
+              {healthCfg.assessed === false
+                ? <p className={`text-xs ${healthCfg.text} opacity-70`}>Identification-only result — health assessment unavailable</p>
+                : <p className={`text-xs ${healthCfg.text} opacity-70`}>{formatConfidence(result.isHealthyScore)} healthy probability</p>
+              }
             </div>
           </div>
 
-          {result.diseases.length === 0 ? (
+          {healthCfg.assessed === false ? (
+            <div className="flex flex-col items-center py-10 text-center gap-3">
+              <MdHelpOutline className="text-4xl text-zinc-400" />
+              <p className="text-sm font-bold text-zinc-800">Health assessment not available</p>
+              <p className="text-xs text-[#47464a] max-w-xs">
+                This plant was identified, but its health couldn't be evaluated in this scan.
+              </p>
+            </div>
+          ) : result.diseases.length === 0 ? (
             <div className="flex flex-col items-center py-10 text-center gap-3">
               <MdCheckCircle className="text-4xl text-emerald-400" />
               <p className="text-sm font-bold text-zinc-800">No issues detected</p>

@@ -2,8 +2,11 @@ export function buildGeminiPrompt(plantIdResult) {
   const top        = plantIdResult.suggestions?.[0];
   const commonName = top?.commonNames?.[0] || top?.name || 'Unknown Plant';
   const sciName    = top?.name || '';
-  const isHealthy  = plantIdResult.isHealthy;
   const diseases   = plantIdResult.diseases?.map((d) => d.name).join(', ') || 'none detected';
+  const healthStatus =
+    plantIdResult.isHealthy === true   ? 'Healthy'
+    : plantIdResult.isHealthy === false ? 'Unhealthy / Diseased'
+    : 'Not visually assessed';
 
   const taxonomy = top?.taxonomy;
   const taxonomyHint = taxonomy
@@ -15,7 +18,7 @@ You are an expert botanist and horticulturist. A plant has been identified with 
 
 - Common Name: ${commonName}
 - Scientific Name: ${sciName}
-- Health Status: ${isHealthy ? 'Healthy' : 'Unhealthy / Diseased'}
+- Health Status: ${healthStatus}
 - Detected Conditions / Diseases: ${diseases}
 ${taxonomyHint}
 
@@ -51,7 +54,7 @@ Provide a comprehensive botanical analysis in STRICT JSON format. Do NOT include
   },
   "commonPests": ["pest1", "pest2", "pest3"],
   "pestControl": "2-3 sentence practical pest management advice for this specific plant",
-  "diseaseManagement": "${isHealthy ? 'Preventive care tips to keep this plant healthy' : `Treatment advice for the detected condition: ${diseases}`}",
+  "diseaseManagement": "${plantIdResult.isHealthy === true ? 'Preventive care tips to keep this plant healthy' : `Treatment and management advice for the condition: ${diseases}`}",
   "propagationMethods": ["method1", "method2"],
   "growthTimeline": {
     "germination": "e.g. 7-14 days",
