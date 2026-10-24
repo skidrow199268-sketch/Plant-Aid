@@ -17,8 +17,8 @@ export default function ClimateControlModal({ onClose }) {
   useEffect(() => {
     (async () => {
       try {
-        const { lat, lon } = await getUserLocation();
-        const w = await fetchWeather(lat, lon);
+        const location = await getUserLocation();
+        const w = await fetchWeather(location.lat, location.lon, location.name, location.country);
         setWeather(w);
       } catch (err) {
         console.error('ClimateControlModal weather error:', err);

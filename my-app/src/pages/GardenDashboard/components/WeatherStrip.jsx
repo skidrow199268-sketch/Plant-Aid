@@ -14,8 +14,8 @@ export default function WeatherStrip() {
   useEffect(() => {
     (async () => {
       try {
-        const { lat, lon } = await getUserLocation();
-        setWeather(await fetchWeather(lat, lon));
+        const location = await getUserLocation();
+        setWeather(await fetchWeather(location.lat, location.lon, location.name, location.country));
       } catch (err) {
         console.error('Weather fetch error:', err);
       } finally {

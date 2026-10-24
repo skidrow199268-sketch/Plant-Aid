@@ -15,13 +15,14 @@ import {
 
 import {
   fetchWeather,
+  fetchForecast,
   getUserLocation,
- 
+
 } from '../../DashboardToday/services/DashboardServices.js';
 
 import { MdErrorOutline,} from 'react-icons/md';
 
-import {BotanicalSummary,DeveloperModal,HelpModal,HighWindAlert,LogoutModal,
+import {BotanicalSummary,DeveloperModal,HelpModal,HighWindAlert,LogoutModal,LocationSetting,
   NotificationsModal,ProfileModal,SettingsMenu,TermsModal,WeatherForecast,Footer
 } from '../components/index.js'
 
@@ -39,11 +40,39 @@ export default function PlantAidSettingsView() {
   const [profile,        setProfile]        = useState(null);
   const [settings,       setSettings]       = useState({ ...DEFAULT_SETTINGS });
   const [weather,        setWeather]        = useState(null);
+  const [forecast,       setForecast]       = useState(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
   const [loading,        setLoading]        = useState(true);
   const [error,          setError]          = useState(null);
 
   const [activeModal, setActiveModal] = useState(null);
+
+  // Weather bundle loader — reused for initial load and whenever
+  // the user pins a new location in LocationSetting.
+  const loadWeather = useCallback(async () => {
+    setWeatherLoading(true);
+    try {
+      const location = await getUserLocation();
+      // Forecast failure is non-fatal: the current-weather card still works.
+      const [w, f] = await Promise.all([
+        fetchWeather(location.lat, location.lon, location.name, location.country),
+        fetchForecast(location.lat, location.lon).catch((err) => {
+          console.warn('Forecast fetch failed (non-fatal):', err);
+          return null;
+        }),
+      ]);
+      setWeather(w);
+      setForecast(f);
+    } catch (err) {
+      console.warn('Weather fetch failed (non-fatal):', err);
+    } finally {
+      setWeatherLoading(false);
+    }
+  }, []);
+
+  const handleLocationChanged = useCallback(() => {
+    loadWeather();
+  }, [loadWeather]);
 
   useEffect(() => {
     if (!uid) { setLoading(false); return; }
@@ -63,19 +92,8 @@ export default function PlantAidSettingsView() {
       }
     })();
 
-    (async () => {
-      setWeatherLoading(true);
-      try {
-        const { lat, lon } = await getUserLocation();
-        const w = await fetchWeather(lat, lon);
-        setWeather(w);
-      } catch (err) {
-        console.warn('Weather fetch failed (non-fatal):', err);
-      } finally {
-        setWeatherLoading(false);
-      }
-    })();
-  }, [uid]);
+    loadWeather();
+  }, [uid, loadWeather]);
 
   const openModal  = (name) => setActiveModal(name);
   const closeModal = ()     => setActiveModal(null);
@@ -116,8 +134,9 @@ export default function PlantAidSettingsView() {
             {/* Left — Weather */}
             <section className="lg:col-span-7 space-y-4 sm:space-y-5">
               <HighWindAlert weather={weather} />
-              <WeatherForecast weather={weather} weatherLoading={weatherLoading} />
+              <WeatherForecast weather={weather} forecast={forecast} weatherLoading={weatherLoading} />
               <BotanicalSummary weather={weather} />
+              <LocationSetting onChanged={handleLocationChanged} />
             </section>
 
             {/* Right — Settings */}

@@ -1,35 +1,45 @@
-import { MdCloud, MdWbSunny, MdWbCloudy } from 'react-icons/md';
+import { MdWbCloudy } from 'react-icons/md';
 import {WeatherDayCard} from './index'
-import { IoRainy, IoPartlySunny } from 'react-icons/io5';
 import {weatherIcon} from '../utils/weather'
 import { getSeason } from '../../DashboardToday/utils/season'
-export default function WeatherForecast({ weather, weatherLoading }) {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
-  const todayIdx = days.findIndex((d) => d.toUpperCase() === today.toUpperCase());
+// Real 5-day forecast: today's card uses live current-weather data,
+// the remaining cards come from the aggregated OWM forecast (next 4 days).
+// If the forecast failed to load, later days render as placeholders (no fake data).
+export default function WeatherForecast({ weather, forecast, weatherLoading }) {
   const season = getSeason(weather);
 
-  const staticUpcoming = [
-    { icon: MdCloud,       temp: '29', humidity: '25%' },
-    { icon: IoRainy,       temp: '26', humidity: '80%' },
-    { icon: IoPartlySunny, temp: '28', humidity: '15%' },
-    { icon: MdWbSunny,     temp: '32', humidity: '5%'  },
-  ];
+  // Upcoming days start after today (forecast[0] is today; OWM free tier gives 5).
+  const todayKey = new Date().toDateString();
+  const upcomingDays = (forecast ?? [])
+    .filter((f) => f.key !== todayKey)
+    .slice(0, 4);
 
-  const forecastCards = days.map((day, i) => {
-    const isToday = i === (todayIdx >= 0 ? todayIdx : 0);
-    if (isToday && weather) {
-      return {
-        day,
-        Icon:     weatherIcon(weather.icon),
-        temp:     String(weather.temp),
-        humidity: `${weather.humidity}%`,
-        isActive: true,
-      };
-    }
-    const upcoming = staticUpcoming[(i > (todayIdx >= 0 ? todayIdx : 0) ? i - (todayIdx >= 0 ? todayIdx : 0) : i + days.length - (todayIdx >= 0 ? todayIdx : 0)) - 1] || staticUpcoming[0];
-    return { day, Icon: upcoming.icon, temp: upcoming.temp, humidity: upcoming.humidity, isActive: false };
+  const forecastCards = [];
+
+  if (weather) {
+    forecastCards.push({
+      day:      'Today',
+      Icon:     weatherIcon(weather.icon),
+      temp:     String(weather.temp),
+      humidity: `${weather.humidity}%`,
+      isActive: true,
+    });
+  }
+
+  upcomingDays.forEach((f) => {
+    forecastCards.push({
+      day:      f.day,
+      Icon:     weatherIcon(f.icon),
+      temp:     String(f.max),
+      humidity: `${f.humidity}%`,
+      isActive: false,
+    });
   });
+
+  // Keep the 5-column grid filled even while loading / after a failure.
+  while (forecastCards.length < 5 && !upcomingDays.length) {
+    forecastCards.push({ day: '…', Icon: null, temp: '–', humidity: '–', isActive: false });
+  }
 
   return (
     <div className="bg-white dark:bg-zinc-900 border border-[#c8c5ca]/50 dark:border-zinc-700/50 rounded-3xl p-4 sm:p-6 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] dark:shadow-zinc-900/20">
