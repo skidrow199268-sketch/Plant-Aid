@@ -229,6 +229,7 @@ export default function DiagnosticScan() {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={handleModalSave}
+        onViewDetails={() => setModalOpen(false)}
         plantData={modalPlantData}
         saving={saving}
         analysisLoading={analysisLoading}   // ← new prop

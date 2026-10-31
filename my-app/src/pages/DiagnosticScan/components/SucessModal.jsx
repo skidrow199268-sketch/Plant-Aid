@@ -1,11 +1,11 @@
-import { MdEco, MdVerifiedUser, MdLibraryAdd, MdClose } from 'react-icons/md';
+import { MdEco, MdVerifiedUser, MdLibraryAdd, MdClose, MdArrowForward } from 'react-icons/md';
 import { IoLeaf } from 'react-icons/io5';
 import {getStatusConfig} from '../utils/getStatusConfig'
 // Dynamic badge coloring based on health status string —
 // mirrors the design language used in getHealthConfig() elsewhere in the app.
 
 
-export default function ScanSuccessModal({ isOpen, onClose, onSave, plantData, saving, analysisLoading }) {
+export default function ScanSuccessModal({ isOpen, onClose, onSave, onViewDetails, plantData, saving, analysisLoading }) {
   if (!isOpen) return null;
 
   const plantInfo = {
@@ -126,8 +126,18 @@ export default function ScanSuccessModal({ isOpen, onClose, onSave, plantData, s
           </div>
         </section>
 
-        {/* Save button */}
-        <footer>
+        {/* Actions */}
+        <footer className="space-y-2.5">
+          {onViewDetails && (
+            <button
+              onClick={onViewDetails}
+              className="w-full border border-[#1b6b51]/30 dark:border-[#a6f2d1]/30 bg-transparent text-[#1b6b51] dark:text-[#a6f2d1] font-bold text-sm py-3.5 rounded-2xl flex items-center justify-center gap-2 hover:bg-[#a6f2d1]/15 active:scale-95 transition-all duration-200"
+            >
+              <span className="truncate">View more details</span>
+              <MdArrowForward className="text-lg" />
+            </button>
+          )}
+
           <button
             onClick={onSave}
             disabled={analysisLoading || saving}

@@ -182,6 +182,15 @@ export default function CameraSheet({ onClose }) {
     // hook into garden catalog save logic here if needed
   }, []);
 
+  // "View more details" inside the confidence modal: close it, close
+  // the sheet, and open the full diagnostic page (it hydrates from the
+  // scan cache, so the result is already there).
+  const handleModalViewDetails = useCallback(() => {
+    setSuccessModalOpen(false);
+    onClose();
+    navigate('/diagnostic-scan');
+  }, [navigate, onClose]);
+
   const topMatch   = result?.suggestions?.[0];
   const healthCfg  = result ? getHealthConfig(result.isHealthy, result.isHealthyScore) : null;
   const confidence = topMatch ? Math.round((topMatch.probability ?? 0) * 100) : 0;
@@ -327,6 +336,7 @@ export default function CameraSheet({ onClose }) {
         isOpen={successModalOpen}
         onClose={() => setSuccessModalOpen(false)}
         onSave={handleModalSave}
+        onViewDetails={handleModalViewDetails}
         plantData={successPlantData}
       />
 
